@@ -13,3 +13,5 @@ ITRF_2020 = pd.read_fwf("data/ITRF2020_GNSS.SSC.txt", skiprows=8,  names=["DOMES
 pmm_itrf =  pd.read_fwf("data/pmm_itrf.txt", skiprows=4,  names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS","Sigma_y","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"] )
 
 print(pmm_itrf)
+
+print()
