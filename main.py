@@ -9,8 +9,7 @@ import math
 
 import json
 import part2
-#earth = pd.read_fwf("data/Earth_Parameters.dat", skiprows = 8)
-
+import part5
 
 with open("data/Tectonic_Plates.geojson") as f:
     Plaques_Techtoniques = json.load(f)
@@ -19,14 +18,6 @@ with open("data/Tectonic_Plates.geojson") as f:
 ITRF_2020 = pd.read_fwf("data/ITRF2020_GNSS.SSC.txt", skiprows=8,  names=["DOMES NB", "SITE NAME", "TECH","ID", "X/Vx","Y/Vy","Z/Vz","Sigma_x","Sigma_y","Sigma_z","SOLN","DATA_START","DATA_END"] )
 pmm_itrf = pd.read_csv("data/pmm_itrf.txt",sep='\s+',skiprows=4,names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS","Sigma_y","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"])
 
-'''
-filtre_pos = (ITRF_2020['DATA_END'] == "00:000:00000") | ((ITRF_2020['DATA_END'].isna()) & (ITRF_2020['SITE NAME'].notna()) )
-#je prends une condition sur data_end et les lignes en dessous qui correspond à la vitesse doivent être retirer : notna() enlèbe tout les NaN
-
-
-last_version_position1 = ITRF_2020.loc[filtre_pos, ['SITE NAME', 'X/Vx','Y/Vy','Z/Vz'] ]
-last_version_position1 = last_version_position1.drop_duplicates(subset = 'SITE NAME', keep = 'first')
-'''
 
 last_version_position2 = ITRF_2020.loc[(ITRF_2020['SITE NAME'].notna())]
 #pour retirer toute les lignes qui traitent de la vitesse (la ville n'est pas renseigné donc NaN)
@@ -98,6 +89,7 @@ for feature in Plaques_Techtoniques["features"]:
 
         for polygon in coords:
             points.extend(polygon[0])
+            points.append([np.nan, np.nan])
             
     if len(points) > 0:
         nb_cols = len(points[0])
@@ -127,7 +119,15 @@ dico_plaques_pmm_noms = {
 
 # 2.1
 
-last_version_position2['Plate'] = part2.isIn_geoPandas(last_version_position2, dico_plaques_pmm_noms)
+gdf_joined = part2.isIn_geoPandas(last_version_position2, "data/Tectonic_Plates.geojson")
+test_version = last_version_position2.copy()
+
+test_version['Plate'] = gdf_joined['PlateName']
+
+last_version_position2['Plate'] = part2.isIn_mat(last_version_position2,dico_plaques_pmm_noms)
+
 
 print("\nAffichage des stations avec leur plaque tectonique associée :")
-print(last_version_position2[['SITE NAME', 'Plate']])
+print(last_version_position2)
+
+part5.afficher_carte_interactive(dico_plaques_pmm_noms, last_version_position2)

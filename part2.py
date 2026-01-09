@@ -114,13 +114,8 @@ def isIn_mat(df_points, df_plaques):
         
     return pd.Series(results, index=df_points.index)
 
-def isIn_geoPandas(df_points, df_plaques):
-    gdf_points = geopandas.GeoDataFrame(geometry=geopandas.points_from_xy(df_points['lon(degres)'],df_points['lat(degres)']))
-
-    joined  = geopandas.GeoDataFrame()
+def isIn_geoPandas(df_points, path):
+    gdf_points = geopandas.GeoDataFrame(df_points, geometry=geopandas.points_from_xy(df_points['lon(degres)'], df_points['lat(degres)']), crs="EPSG:4326")
+    gdf_plaques = geopandas.read_file(path)
     
-    for  k,v in df_plaques.items():
-        plaque = geopandas.GeoDataFrame(geometry=geopandas.points_from_xy(v['Lon'],v['Lat']))
-        joined.add(geopandas.sjoin(gdf_points, plaque, how="left", predicate="within"))
-
-    return joined
+    return geopandas.sjoin(gdf_points, gdf_plaques, how="left", predicate="intersects")
