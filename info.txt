@@ -39,3 +39,14 @@ df["phi"] = df.apply(lambda row: test(row["a"], row["b"], row["c"]), axis=1) axi
 pour appliquer une fonction à des colonnes, lambda fonction anonyme évite d'en créé une nouvelle qui force le return 
 pour chaque ligne du DataFrame, elle prend les 3 valeurs X/Vx, Y/Vy, Z/Vz,
  appelle xyz_to_pol(...), récupère le 1er élément [0], et le met dans la nouvelle colonne "lambda"
+
+
+
+ '''
+filtre_pos = (ITRF_2020['DATA_END'] == "00:000:00000") | ((ITRF_2020['DATA_END'].isna()) & (ITRF_2020['SITE NAME'].notna()) )
+#je prends une condition sur data_end et les lignes en dessous qui correspond à la vitesse doivent être retirer : notna() enlèbe tout les NaN
+
+
+last_version_position1 = ITRF_2020.loc[filtre_pos, ['SITE NAME', 'X/Vx','Y/Vy','Z/Vz'] ]
+last_version_position1 = last_version_position1.drop_duplicates(subset = 'SITE NAME', keep = 'first')
+'''
