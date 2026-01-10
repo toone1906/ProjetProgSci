@@ -7,11 +7,11 @@ from tqdm import tqdm
 import math
 import time
 import json
-
-import part2
-import part5
-import part3
 import part1
+import part2
+import part3
+import part4
+import part5
 
 tqdm.pandas(desc="Calcul coordonnées")
 
@@ -125,6 +125,9 @@ print(res_proxi)
 d1 = time.time()
 print(f'Temps calcul déformation : {d1-d:.2f}s')
 
+
+#4
+print(part4.v_pred(pmm_itrf,last_version_position2))
 
 #5
 print("\nGénération des cartes...")
