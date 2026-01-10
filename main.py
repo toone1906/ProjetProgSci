@@ -8,11 +8,11 @@ import math
 import time
 
 import json
-import part2
-import part5
-import part3
 import part1
-
+import part2
+import part3
+import part4
+import part5
 
 d1 = time.time()
 
@@ -63,7 +63,7 @@ last_version_position2['lat(degres)'] = last_version_position2.apply(part1.degre
 
 
 #1.2
-
+'''
 GSRM["deformation"] = np.sqrt(GSRM["exx"]**2 + GSRM["eyy"]**2 + 2 * GSRM["exy"]**2)
 
 GRSM = GSRM[GSRM["deformation"] > 50]
@@ -71,7 +71,7 @@ GRSM = GSRM[GSRM["deformation"] > 50]
 GRSM = GRSM.sort_values(by=["lat", "long", "deformation"], ascending=True)
 
 GRSM = GRSM.drop_duplicates(subset=["lat","long"], keep="last")
-
+'''
 #1.3
 dico_plaques = {}
 
@@ -135,6 +135,11 @@ print("\nAffichage des stations avec leur plaque tectonique associée :")
 
 #3
 d = time.time()
-print(part3.proxi(GRSM,last_version_position2))
+#print(part3.proxi(GRSM,last_version_position2))
 d1 = time.time()
 print('temps defo la plus proche', d1-d)
+
+
+
+#4
+print(part4.v_pred(pmm_itrf,last_version_position2))

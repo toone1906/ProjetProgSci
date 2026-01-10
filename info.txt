@@ -50,3 +50,7 @@ filtre_pos = (ITRF_2020['DATA_END'] == "00:000:00000") | ((ITRF_2020['DATA_END']
 last_version_position1 = ITRF_2020.loc[filtre_pos, ['SITE NAME', 'X/Vx','Y/Vy','Z/Vz'] ]
 last_version_position1 = last_version_position1.drop_duplicates(subset = 'SITE NAME', keep = 'first')
 '''
+
+
+merge_ITRF = ITRFcop.merge(pmm,left_on = "Plate", right_on = "Name", how = "left",validate="m:1")
+many to one si le coté droit repere plusieurs plate qui correspond ça es stoppe
