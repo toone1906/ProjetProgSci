@@ -29,7 +29,7 @@ with tqdm(total=3, desc="Chargement fichiers") as pbar:
     pbar.update(1)
     
     ITRF_2020 = pd.read_fwf("data/ITRF2020_GNSS.SSC.txt", skiprows=8,colspecs=colspecs_ITRF, names=["DOMES NB", "SITE NAME", "TECH","ID", "X/Vx","Y/Vy","Z/Vz","Sigma_x","Sigma_y","Sigma_z","SOLN","DATA_START","DATA_END"] )
-    pmm_itrf = pd.read_csv("data/pmm_itrf.txt",sep='\s+',skiprows=4,names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS","Sigma_y","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"])
+    pmm_itrf = pd.read_csv("data/pmm_itrf.txt",sep='\s+',skiprows=4,names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS_E","WRSM_N","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"])
     pbar.update(1)
 
 d2 = time.time()
@@ -48,6 +48,8 @@ last_version_position2['lon(rad)'] = last_version_position2.progress_apply(part1
 last_version_position2['lat(rad)'] = last_version_position2.progress_apply(part1.radlat, axis = 1)
 last_version_position2['lon(degres)'] = last_version_position2.progress_apply(part1.degreslon, axis = 1 )
 last_version_position2['lat(degres)'] = last_version_position2.progress_apply(part1.degreslat, axis = 1)
+
+print(last_version_position2)
 
 GSRM["deformation"] = np.sqrt(GSRM["exx"]**2 + GSRM["eyy"]**2 + 2 * GSRM["exy"]**2)
 GSRM = GSRM[GSRM["deformation"] > 50]
@@ -130,6 +132,7 @@ print(f'Temps calcul déformation : {d1-d:.2f}s')
 print(part4.v_pred(pmm_itrf,last_version_position2))
 
 #5
+
 print("\nGénération des cartes...")
 
 part5.carte_monde_statique(dico_plaques_pmm_noms, last_version_position2, GSRM)
