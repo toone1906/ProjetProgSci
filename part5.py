@@ -20,7 +20,7 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
     scatter = ax.scatter(df_GSRM['long'], df_GSRM['lat'],
                           transform=ccrs.PlateCarree(),
                           color='orange', 
-                          s=15,  # Points légèrement plus gros pour la vue zoomée
+                          s=15,  
                           marker='o',
                           label='Deformation',
                           zorder=3,
@@ -52,8 +52,10 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
                           zorder=10) 
     SCALE_FACTOR = 0.15
     
-    q = ax.quiver(df_stations['lon(degres)'].values, df_stations['lat(degres)'].values,
-                  df_stations['VE'].values, df_stations['VN'].values,
+    mask = df_stations['in_deformation'] == False
+    
+    q = ax.quiver(df_stations.loc[mask, 'lon(degres)'].values, df_stations.loc[mask,'lat(degres)'].values,
+                  df_stations.loc[mask,'VE'].values, df_stations.loc[mask,'VN'].values,
                   transform=ccrs.PlateCarree(),
                   color='darkblue',        
                   width=0.002,           
@@ -63,13 +65,28 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
                   scale_units='inches',   
                   zorder=15,               
                   label='Vitesse prédite')
+    
+    mask2 = df_stations['in_deformation'] == True
+    
+    q2 = ax.quiver(df_stations.loc[mask2, 'lon(degres)'].values, df_stations.loc[mask2,'lat(degres)'].values,
+                  df_stations.loc[mask2,'VE'].values, df_stations.loc[mask2,'VN'].values,
+                  transform=ccrs.PlateCarree(),
+                  color='lightblue',        
+                  width=0.002,           
+                  headwidth=2,         
+                  headlength=2,            
+                  scale=SCALE_FACTOR,      
+                  scale_units='inches',   
+                  zorder=15,               
+                  label='Vitesse prédite')
+    
     REF_VELOCITY = 5
     
     ax.quiverkey(q, 
-                 X=0.9, Y=0.05,            # Position de la légende (en bas à droite)
-                 U=REF_VELOCITY,           # Longueur de la flèche de référence
-                 label=f'{REF_VELOCITY} cm/an', # Texte de la légende
-                 labelpos='E',             # Texte à l'Est de la flèche
+                 X=0.9, Y=0.05,            
+                 U=REF_VELOCITY,           
+                 label=f'{REF_VELOCITY} cm/an', 
+                 labelpos='E',             
                  coordinates='axes', fontproperties={'size': 10})
 
     ax.set_title("Plaques Tectoniques et Stations GNSS")
@@ -129,10 +146,26 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
                           zorder=10) 
     SCALE_FACTOR = 0.15
     
-    q = ax.quiver(df_stations['lon(degres)'].values, df_stations['lat(degres)'].values,
-                  df_stations['VE'].values, df_stations['VN'].values,
+    mask = df_stations['in_deformation'] == False
+    
+    q = ax.quiver(df_stations.loc[mask, 'lon(degres)'].values, df_stations.loc[mask,'lat(degres)'].values,
+                  df_stations.loc[mask,'VE'].values, df_stations.loc[mask,'VN'].values,
                   transform=ccrs.PlateCarree(),
                   color='darkblue',        
+                  width=0.002,           
+                  headwidth=2,         
+                  headlength=2,            
+                  scale=SCALE_FACTOR,      
+                  scale_units='inches',   
+                  zorder=15,               
+                  label='Vitesse prédite')
+    
+    mask2 = df_stations['in_deformation'] == True
+    
+    q2 = ax.quiver(df_stations.loc[mask2, 'lon(degres)'].values, df_stations.loc[mask2,'lat(degres)'].values,
+                  df_stations.loc[mask2,'VE'].values, df_stations.loc[mask2,'VN'].values,
+                  transform=ccrs.PlateCarree(),
+                  color='lightblue',        
                   width=0.002,           
                   headwidth=2,         
                   headlength=2,            

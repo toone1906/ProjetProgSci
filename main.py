@@ -123,18 +123,17 @@ with tqdm(total=1, desc="Calcul Proximité (Part 3)") as pbar:
     res_proxi = part3.proxi(GSRM, last_version_position2)
     pbar.update(1)
 
-print(res_proxi)
 
 d1 = time.time()
 print(f'Temps calcul déformation : {d1-d:.2f}s')
 
 #4
-last_version_position2 = part4.v_pred(pmm_itrf,last_version_position2)
+res_proxi = part4.v_pred(pmm_itrf,res_proxi)
 
 #5
 print("\nGénération des cartes...")
 
-part5.carte_monde_statique(dico_plaques_pmm_noms, last_version_position2, GSRM)
-part5.carte_eurasie_statique(dico_plaques_pmm_noms, last_version_position2, GSRM)
+part5.carte_monde_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
+part5.carte_eurasie_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
 
 print("\n--- Terminée ---")
