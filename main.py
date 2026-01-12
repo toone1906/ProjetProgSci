@@ -32,10 +32,6 @@ with tqdm(total=3, desc="Chargement fichiers") as pbar:
     
     GSRM = pd.read_fwf("data/GSRM_strain.txt", skiprows=25, names=["lat","long", "exx","eyy","exy","vorticity","RL-NLC","LL-NLC","e1","e2","azi_e1"] )
     pbar.update(1)
-    
-    ITRF_2020 = pd.read_fwf("data/ITRF2020_GNSS.SSC.txt", skiprows=8,colspecs=colspecs_ITRF, names=["DOMES NB", "SITE NAME", "TECH","ID", "X/Vx","Y/Vy","Z/Vz","Sigma_x","Sigma_y","Sigma_z","SOLN","DATA_START","DATA_END"] )
-    pmm_itrf = pd.read_csv("data/pmm_itrf.txt",sep='\s+',skiprows=4,names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS","Sigma_y","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"])
-    pbar.update(1)
 
 d2 = time.time()
 tqdm.write(f'Ouverture fichiers terminée en {d2-d1:.2f}s')
