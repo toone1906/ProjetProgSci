@@ -42,13 +42,42 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
                 color=color, 
                 linewidth=1.5,
                 zorder=5)
+           
+    scatter = ax.scatter(df_stations['lon(degres)'], df_stations['lat(degres)'],
+                          transform=ccrs.PlateCarree(),
+                          color='red', 
+                          s=15,  # Points légèrement plus gros pour la vue zoomée
+                          marker='o',
+                          label='Stations GNSS',
+                          zorder=10) 
+    SCALE_FACTOR = 0.15
+    
+    q = ax.quiver(df_stations['lon(degres)'].values, df_stations['lat(degres)'].values,
+                  df_stations['VE'].values, df_stations['VN'].values,
+                  transform=ccrs.PlateCarree(),
+                  color='darkblue',        
+                  width=0.002,           
+                  headwidth=2,         
+                  headlength=2,            
+                  scale=SCALE_FACTOR,      
+                  scale_units='inches',   
+                  zorder=15,               
+                  label='Vitesse prédite')
+    REF_VELOCITY = 5
+    
+    ax.quiverkey(q, 
+                 X=0.9, Y=0.05,            # Position de la légende (en bas à droite)
+                 U=REF_VELOCITY,           # Longueur de la flèche de référence
+                 label=f'{REF_VELOCITY} cm/an', # Texte de la légende
+                 labelpos='E',             # Texte à l'Est de la flèche
+                 coordinates='axes', fontproperties={'size': 10})
 
     ax.set_title("Plaques Tectoniques et Stations GNSS")
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=5, fontsize='x-small')
 
     print("Carte générée. Utilisez les outils de la fenêtre pour zoomer/déplacer.")
-    plt.savefig("Carte_monde.png", format="png")
+    plt.savefig("output/Carte_monde.png", format="png")
     plt.show()
 
 def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
@@ -98,26 +127,26 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
                           marker='o',
                           label='Stations GNSS',
                           zorder=10) 
-    SCALE_FACTOR = 0.05
+    SCALE_FACTOR = 0.15
     
     q = ax.quiver(df_stations['lon(degres)'].values, df_stations['lat(degres)'].values,
                   df_stations['VE'].values, df_stations['VN'].values,
                   transform=ccrs.PlateCarree(),
                   color='darkblue',        
                   width=0.002,           
-                  headwidth=3,         
-                  headlength=4,            
+                  headwidth=2,         
+                  headlength=2,            
                   scale=SCALE_FACTOR,      
                   scale_units='inches',   
                   zorder=15,               
                   label='Vitesse prédite')
-    REF_VELOCITY = 50 
+    REF_VELOCITY = 5 
     
     ax.quiverkey(q, 
-                 X=0.9, Y=0.05,            # Position de la légende (en bas à droite)
-                 U=REF_VELOCITY,           # Longueur de la flèche de référence
-                 label=f'{REF_VELOCITY} mm/an', # Texte de la légende
-                 labelpos='E',             # Texte à l'Est de la flèche
+                 X=0.9, Y=0.05,           
+                 U=REF_VELOCITY,          
+                 label=f'{REF_VELOCITY} cm/an',
+                 labelpos='E',             
                  coordinates='axes', fontproperties={'size': 10})
     
 
@@ -126,5 +155,5 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=5, fontsize='x-small')
 
     print("Carte Eurasie générée.")
-    plt.savefig("Carte_Eurasie.png", format="png", bbox_inches='tight') 
+    plt.savefig("output/Carte_Eurasie.png", format="png", bbox_inches='tight') 
     plt.show()

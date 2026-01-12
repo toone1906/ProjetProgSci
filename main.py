@@ -17,7 +17,6 @@ tqdm.pandas(desc="Calcul coordonnées")
 
 d1 = time.time()
 
-
 print("--- Démarrage du chargement des données ---")
 with tqdm(total=3, desc="Chargement fichiers") as pbar:
     
@@ -42,7 +41,7 @@ last_version_position2 = last_version_position2.drop_duplicates(subset= 'SITE NA
 last_version_vitesse = ITRF_2020.drop_duplicates(subset= 'DOMES NB', keep='last')
 last_version_vitesse = last_version_vitesse.loc[:, ['DOMES NB', 'X/Vx', 'Y/Vy','Z/Vz']]
 
-# Q3 : Conversion cartésien -> lat/lon
+#1.1.3 : Conversion cartésien -> lat/lon
 print("\nConversion des coordonnées")
 
 last_version_position2['lon(rad)'] = last_version_position2.progress_apply(part1.radlon, axis = 1)
@@ -91,6 +90,8 @@ for feature in tqdm(features_list, desc="Analyse géométrie plaques"):
             df["h"] = 0
 
         dico_plaques[nom] = df
+      
+pmm_itrf["Name"] = pmm_itrf["Name"].str.replace("_", " ")
         
 noms_itrf = set(pmm_itrf["Name"].unique())
 
@@ -114,7 +115,6 @@ with tqdm(total=2, desc="Calculs spatiaux (Part 2)") as pbar:
 
 print("Affichage des stations avec leur plaque tectonique associée (échantillon) :")
 
-
 #3
 d = time.time()
 print("\nRecherche de déformation la plus proche...")
@@ -128,15 +128,13 @@ print(res_proxi)
 d1 = time.time()
 print(f'Temps calcul déformation : {d1-d:.2f}s')
 
-
 #4
 last_version_position2 = part4.v_pred(pmm_itrf,last_version_position2)
 
 #5
-
 print("\nGénération des cartes...")
 
-#part5.carte_monde_statique(dico_plaques_pmm_noms, last_version_position2, GSRM)
+part5.carte_monde_statique(dico_plaques_pmm_noms, last_version_position2, GSRM)
 part5.carte_eurasie_statique(dico_plaques_pmm_noms, last_version_position2, GSRM)
 
 print("\n--- Terminée ---")
