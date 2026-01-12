@@ -20,17 +20,19 @@ d1 = time.time()
 
 print("--- Démarrage du chargement des données ---")
 with tqdm(total=3, desc="Chargement fichiers") as pbar:
+    
+    colspecs_ITRF = [(0, 9),(10, 25), (26,30),(32, 36),(37, 50),(51, 64),(65, 79),(80, 85),(86, 92),(93, 99),(100, 102),(103, 115),(116, 128)]
+    ITRF_2020 = pd.read_fwf("data/ITRF2020_GNSS.SSC.txt", skiprows=8,colspecs=colspecs_ITRF, names=["DOMES NB", "SITE NAME", "TECH","ID", "X/Vx","Y/Vy","Z/Vz","Sigma_x","Sigma_y","Sigma_z","SOLN","DATA_START","DATA_END"] )
+    pmm_itrf = pd.read_csv("data/pmm_itrf.txt",sep='\s+',skiprows=4,names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS","Sigma_y","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"])
+    pbar.update(1)
+    
     with open("data/Tectonic_Plates.geojson") as f:
         Plaques_Techtoniques = json.load(f)
     pbar.update(1)
     
-    colspecs_ITRF = [(0, 9),(10, 25), (26,30),(32, 36),(37, 50),(51, 64),(65, 79),(80, 85),(86, 92),(93, 99),(100, 102),(103, 115),(116, 128)]
     GSRM = pd.read_fwf("data/GSRM_strain.txt", skiprows=25, names=["lat","long", "exx","eyy","exy","vorticity","RL-NLC","LL-NLC","e1","e2","azi_e1"] )
     pbar.update(1)
     
-    ITRF_2020 = pd.read_fwf("data/ITRF2020_GNSS.SSC.txt", skiprows=8,colspecs=colspecs_ITRF, names=["DOMES NB", "SITE NAME", "TECH","ID", "X/Vx","Y/Vy","Z/Vz","Sigma_x","Sigma_y","Sigma_z","SOLN","DATA_START","DATA_END"] )
-    pmm_itrf = pd.read_csv("data/pmm_itrf.txt",sep='\s+',skiprows=4,names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS","Sigma_y","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"])
-    pbar.update(1)
 
 d2 = time.time()
 tqdm.write(f'Ouverture fichiers terminée en {d2-d1:.2f}s')
@@ -127,12 +129,12 @@ print(f'Temps calcul déformation : {d1-d:.2f}s')
 
 
 #4
-print(part4.v_pred(pmm_itrf,last_version_position2))
+last_version_position2 = part4.v_pred(pmm_itrf,last_version_position2)
 
 #5
 print("\nGénération des cartes...")
 
-part5.carte_monde_statique(dico_plaques_pmm_noms, last_version_position2, GSRM)
+#part5.carte_monde_statique(dico_plaques_pmm_noms, last_version_position2, GSRM)
 part5.carte_eurasie_statique(dico_plaques_pmm_noms, last_version_position2, GSRM)
 
 print("\n--- Terminée ---")
