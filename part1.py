@@ -1,4 +1,4 @@
-import math 
+import numpy as np
 
 with open("data/Earth_Parameters.dat", 'r') as f: 
     txt = f.readlines()
@@ -11,15 +11,15 @@ def xyz_to_pol(x,y,z):
     ae = float(earth['ae'])
     fe = 1/float(earth['1/fe'])
     ee2 = fe*(2-fe)
-    r = math.sqrt(x**2 + y**2 + z**2)
-    mu = math.atan(z/math.sqrt(x**2+y**2) * ((1-fe) + ae*ee2/r))
-    lamb = 2 * math.atan(y / (x + math.sqrt(x**2 + y**2)))
-    phi = math.atan((z*(1-fe)+ee2*ae*math.sin(mu)**3 )/((1-fe) * (math.sqrt(x**2 + y**2) - ee2*ae*math.cos(mu)**3)))
+    r = np.sqrt(x**2 + y**2 + z**2)
+    mu = np.atan(z/np.sqrt(x**2+y**2) * ((1-fe) + ae*ee2/r))
+    lamb = 2 * np.atan(y / (x + np.sqrt(x**2 + y**2)))
+    phi = np.atan((z*(1-fe)+ee2*ae*np.sin(mu)**3 )/((1-fe) * (np.sqrt(x**2 + y**2) - ee2*ae*np.cos(mu)**3)))
     return lamb, phi
 
 #Q4 doit rajouter deux colonnes où on
 def rad_to_degres(rad): 
-    return rad*180/math.pi
+    return rad*180/np.pi
 
 
 def radlon(r): 
