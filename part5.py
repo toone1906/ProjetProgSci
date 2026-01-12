@@ -51,10 +51,6 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
     plt.savefig("Carte_monde.png", format="png")
     plt.show()
 
-import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-
 def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     fig = plt.figure(figsize=(14, 8))
     
@@ -105,17 +101,17 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     SCALE_FACTOR = 0.05
     
     q = ax.quiver(df_stations['lon(degres)'].values, df_stations['lat(degres)'].values,
-                  df_stations['Vx_pred'].values, df_stations['Vy_pred'].values,
+                  df_stations['VE'].values, df_stations['VN'].values,
                   transform=ccrs.PlateCarree(),
-                  color='darkblue',        # Couleur des flèches
-                  width=0.002,             # Épaisseur du corps de la flèche
-                  headwidth=3,             # Largeur de la tête
-                  headlength=4,            # Longueur de la tête
-                  scale=SCALE_FACTOR,      # L'échelle (le plus important !)
-                  scale_units='inches',    # Unité de l'échelle pour rester cohérent au zoom
-                  zorder=15,               # Tout en haut
+                  color='darkblue',        
+                  width=0.002,           
+                  headwidth=3,         
+                  headlength=4,            
+                  scale=SCALE_FACTOR,      
+                  scale_units='inches',   
+                  zorder=15,               
                   label='Vitesse prédite')
-    REF_VELOCITY = 50 # La valeur de la flèche de référence (ex: 50 mm/an)
+    REF_VELOCITY = 50 
     
     ax.quiverkey(q, 
                  X=0.9, Y=0.05,            # Position de la légende (en bas à droite)
