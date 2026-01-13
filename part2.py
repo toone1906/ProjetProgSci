@@ -68,16 +68,14 @@ def isIn_it(df_points, df_plaques):
     return pd.Series(results, index=df_points.index)
 
 def isIn_mat(df_points, df_plaques):
-    """
-    Détermine pour chaque point de df_points dans quelle plaque de df_plaques il se trouve
-    en utilisant un algorithme de ray-casting vectorisé (matriciel).
-    
+    """_summary_
+
     Args:
-        df_points (pd.DataFrame): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres)'.
-        df_plaques (dict): Dictionnaire de DataFrames représentant les polygones des plaques.
-        
+        df_points (_type_): _description_
+        df_plaques (_type_): _description_
+
     Returns:
-        pd.Series: Une série avec le nom de la plaque pour chaque point.
+        _type_: _description_
     """
     p_lon = df_points['lon(degres)'].values.reshape(-1, 1)
     p_lat = df_points['lat(degres)'].values.reshape(-1, 1)
@@ -115,6 +113,15 @@ def isIn_mat(df_points, df_plaques):
     return pd.Series(results, index=df_points.index)
 
 def isIn_geoPandas(df_points, path):
+    """_summary_
+
+    Args:
+        df_points (_type_): _description_
+        path (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     gdf_points = geopandas.GeoDataFrame(df_points, geometry=geopandas.points_from_xy(df_points['lon(degres)'], df_points['lat(degres)']), crs="EPSG:4326")
     gdf_plaques = geopandas.read_file(path)
     

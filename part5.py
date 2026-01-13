@@ -5,6 +5,13 @@ import numpy as np
 
 
 def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
+    """_summary_
+
+    Args:
+        dico_plaques (_type_): _description_
+        df_stations (_type_): _description_
+        df_GSRM (_type_): _description_
+    """
     fig = plt.figure(figsize=(12, 8))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
     
@@ -80,12 +87,12 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
                   zorder=15,               
                   label='Vitesse prédite')
     
-    REF_VELOCITY = 5
+    REF_VELOCITY = 0.05
     
     ax.quiverkey(q, 
                  X=0.9, Y=0.05,            
                  U=REF_VELOCITY,           
-                 label=f'{REF_VELOCITY} cm/an', 
+                 label=f'{REF_VELOCITY} m/an', 
                  labelpos='E',             
                  coordinates='axes', fontproperties={'size': 10})
 
@@ -98,6 +105,13 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
     plt.show()
 
 def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
+    """_summary_
+
+    Args:
+        dico_plaques (_type_): _description_
+        df_stations (_type_): _description_
+        df_GSRM (_type_): _description_
+    """
     fig = plt.figure(figsize=(14, 8))
     
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
@@ -165,7 +179,7 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     q2 = ax.quiver(df_stations.loc[mask2, 'lon(degres)'].values, df_stations.loc[mask2,'lat(degres)'].values,
                   df_stations.loc[mask2,'VE'].values, df_stations.loc[mask2,'VN'].values,
                   transform=ccrs.PlateCarree(),
-                  color='lightblue',        
+                  color='blue',        
                   width=0.002,           
                   headwidth=2,         
                   headlength=2,            
@@ -173,7 +187,7 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
                   scale_units='inches',   
                   zorder=15,               
                   label='Vitesse prédite')
-    REF_VELOCITY = 5 
+    REF_VELOCITY = 0.05 
     
     ax.quiverkey(q, 
                  X=0.9, Y=0.05,           

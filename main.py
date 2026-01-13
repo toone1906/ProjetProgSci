@@ -2,9 +2,7 @@ import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
-import datetime as t
 from tqdm import tqdm 
-import math
 import time
 import json
 import part1
