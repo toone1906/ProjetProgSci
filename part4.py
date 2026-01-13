@@ -6,6 +6,52 @@ T = (0.37,0.35,0.74)
 sT = (0.08,0.10,0.09)
 
 def v_pred(pmm,ITRF):
+    '''
+    Calcul la vitesse des stations GNSS à partir d'un modèle, puis convertit 
+    la vitesse du repère ECEF (XYZ) vers le repère local ENU (East, North, Up).
+    Indispensable pour projeter les vecteurs sur la carte de cartopy.
+
+    Le modèle vectoriel utilisé est :
+        v_xyz = ω x r + T
+    où :
+      - r = (X, Y, Z) est la position ECEF de la station (m),
+      - ω = (Ωx, Ωy, Ωz) est le vecteur de rotation de la plaque (mas/yr),
+      - T est une constante terrestre de translation (m/yr),
+      - v_xyz est la vitesse prédite en ECEF (m/yr).
+
+    La conversion en ENU est faite au point de la station (défini par sa
+    longitude λ et latitude φ, obtenues via `part1.xyz_to_pol(X, Y, Z)`),
+    par une rotation orthonormée (la norme de la vitesse est conservée).
+
+    :param: 
+    pmm : pandas.DataFrame
+        Table des paramètres de plaques. Contient en particulier:
+          - 'Name' : identifiant de plaque (clé de jointure)
+          - 'Omega_x', 'Omega_y', 'Omega_z' : composantes de ω en mas/yr
+
+        
+
+    ITRF : pandas.DataFrame
+        Table des stations. Contient en particulier :
+          - 'Plate' : identifiant de plaque associée à la station
+          - 'X/Vx', 'Y/Vy', 'Z/Vz' : coordonnées ECEF de la station (m)
+    
+          Hypothèse : une seule plaque par station, soit plusieurs station sur une meme plaque 
+          mais pas l'inverse, échoue alors avec `validate="m:1"`
+
+    Returns
+    -------
+    ITRFcop : pandas.DataFrame
+        Copie de `ITRF` enrichie avec :
+          - 'VE', 'VN', 'VU' : composantes de la vitesse prédite en ENU (m/yr)
+
+        La fonction ne conserve pas explicitement les composantes ECEF dans des
+        colonnes (Vx_pred, Vy_pred, Vz_pred), mais elles sont calculées en
+        interne.
+        Valeurs parfaitement inutile 
+
+    Cependant à utiliser plus tard en vue d'un z_score.
+    '''
     ITRFcop = ITRF.copy()
     merge_ITRF = ITRFcop.merge(pmm[["Name","Omega_x","Omega_y","Omega_z"]],left_on = "Plate", right_on = "Name", how = "left",validate="m:1")
     omega = merge_ITRF[["Omega_x","Omega_y","Omega_z"]].to_numpy() # en mas/yr
