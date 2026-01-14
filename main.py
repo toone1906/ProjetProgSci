@@ -20,7 +20,7 @@ with tqdm(total=3, desc="Chargement fichiers") as pbar:
     
     colspecs_ITRF = [(0, 9),(10, 25), (26,30),(32, 36),(37, 50),(51, 64),(65, 79),(80, 85),(86, 92),(93, 99),(100, 102),(103, 115),(116, 128)]
     ITRF_2020 = pd.read_fwf("data/ITRF2020_GNSS.SSC.txt", skiprows=8,colspecs=colspecs_ITRF, names=["DOMES NB", "SITE NAME", "TECH","ID", "X/Vx","Y/Vy","Z/Vz","Sigma_x","Sigma_y","Sigma_z","SOLN","DATA_START","DATA_END"] )
-    pmm_itrf = pd.read_csv("data/pmm_itrf.txt",sep='\s+',skiprows=4,names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS","Sigma_y","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"])
+    pmm_itrf = pd.read_csv("data/pmm_itrf.txt",sep='\s+',skiprows=4,names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS_E","WRMS_N","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"])
     pbar.update(1)
     
     with open("data/Tectonic_Plates.geojson") as f:
@@ -130,7 +130,13 @@ d1 = time.time()
 print(f'Temps calcul déformation : {d1-d:.2f}s')
 
 #4
-res_proxi = part4.v_pred(pmm_itrf,res_proxi)
+incertitude_proxi = part4.incertitude_vitesse(pmm_itrf,res_proxi)
+res_proxi = part4.v_pred(pmm_itrf,incertitude_proxi)
+
+
+
+print(res_proxi)
+
 
 #5
 print("\nGénération des cartes...")
