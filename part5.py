@@ -54,7 +54,7 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
     scatter = ax.scatter(df_stations['lon(degres)'], df_stations['lat(degres)'],
                           transform=ccrs.PlateCarree(),
                           color='red', 
-                          s=15,  # Points légèrement plus gros pour la vue zoomée
+                          s=15,  
                           marker='o',
                           label='Stations GNSS',
                           zorder=10) 
@@ -101,7 +101,7 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=5, fontsize='x-small')
 
-    print("Carte générée. Utilisez les outils de la fenêtre pour zoomer/déplacer.")
+    print("Carte générée.")
     plt.savefig("output/Carte_Monde.png",dpi=300, format="png", bbox_inches='tight')
 
 def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
@@ -131,7 +131,7 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     scatter = ax.scatter(df_GSRM['long'], df_GSRM['lat'],
                             transform=ccrs.PlateCarree(),
                             color='orange', 
-                            s=15,  # Points légèrement plus gros pour la vue zoomée
+                            s=15,  
                             marker='o',
                             label='Deformation',
                             zorder=3,
@@ -155,7 +155,7 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     scatter = ax.scatter(df_stations['lon(degres)'], df_stations['lat(degres)'],
                           transform=ccrs.PlateCarree(),
                           color='red', 
-                          s=15,  # Points légèrement plus gros pour la vue zoomée
+                          s=15,  
                           marker='o',
                           label='Stations GNSS',
                           zorder=10) 
