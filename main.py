@@ -27,7 +27,7 @@ with tqdm(total=3, desc="Chargement fichiers") as pbar:
         Plaques_Techtoniques = json.load(f)
     pbar.update(1)
     
-    GSRM = pd.read_fwf("data/GSRM_strain.txt", skiprows=25, names=["lat","long", "exx","eyy","exy","vorticity","RL-NLC","LL-NLC","e1","e2","azi_e1"] )
+    GSRM = pd.read_csv("data/GSRM_strain.txt",skiprows=25,sep='\s+',names=["lat","long", "exx","eyy","exy","vorticity","RL-NLC","LL-NLC","e1","e2","azi_e1"],engine='c' )
     pbar.update(1)
 
 d2 = time.time()
@@ -36,7 +36,11 @@ tqdm.write(f'Ouverture fichiers terminée en {d2-d1:.2f}s')
 last_version_position2 = ITRF_2020.loc[(ITRF_2020['SITE NAME'].notna())]
 last_version_position2 = last_version_position2.drop_duplicates(subset= 'SITE NAME', keep = 'last' )
 
-last_version_vitesse = ITRF_2020.drop_duplicates(subset= 'DOMES NB', keep='last')
+tmp = ITRF_2020.copy()
+tmp['DOMES_base'] = tmp['DOMES NB'].str[:-4]
+
+last_version_vitesse = tmp.drop_duplicates(subset='DOMES_base',keep='last').drop(columns='DOMES_base')
+
 last_version_vitesse = last_version_vitesse.loc[:, ['DOMES NB', 'X/Vx', 'Y/Vy','Z/Vz']]
 
 #1.1.3 : Conversion cartésien -> lat/lon
@@ -133,5 +137,13 @@ print("\nGénération des cartes...")
 
 part5.carte_monde_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
 part5.carte_eurasie_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
+
+#Comparaisons de données
+
+last_version_vitesse = last_version_vitesse.sort_values(by=['X/Vx', 'Y/Vy'], ascending=False)
+res_proxi = res_proxi.sort_values(by=['Vx','Vy'], ascending=False)
+
+print(last_version_vitesse.head(10))
+print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz']].head(10))
 
 print("\n--- Terminée ---")

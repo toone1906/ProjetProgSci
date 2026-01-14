@@ -69,6 +69,7 @@ def v_pred(pmm,ITRF):
     Vn =  -sinphi*coslamb*Vx + -sinphi*sinlamb*Vy + cosphi*Vz
     Vu =  cosphi*coslamb*Vx + cosphi*sinlamb*Vy + sinphi*Vz 
     VENU = np.column_stack((Ve,Vn,Vu))
+    ITRFcop[["Vx","Vy","Vz"]] = v
     ITRFcop[["VE","VN","VU"]] = VENU
 
     return ITRFcop

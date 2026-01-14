@@ -103,7 +103,6 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
 
     print("Carte générée. Utilisez les outils de la fenêtre pour zoomer/déplacer.")
     plt.savefig("output/Carte_monde.png", format="png")
-    plt.show()
 
 def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     """
@@ -181,7 +180,7 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     q2 = ax.quiver(df_stations.loc[mask2, 'lon(degres)'].values, df_stations.loc[mask2,'lat(degres)'].values,
                   df_stations.loc[mask2,'VE'].values, df_stations.loc[mask2,'VN'].values,
                   transform=ccrs.PlateCarree(),
-                  color='blue',        
+                  color='lightblue',        
                   width=0.002,           
                   headwidth=2,         
                   headlength=2,            
@@ -205,4 +204,4 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
 
     print("Carte Eurasie générée.")
     plt.savefig("output/Carte_Eurasie.png", format="png", bbox_inches='tight') 
-    plt.show()
+
