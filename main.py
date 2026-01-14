@@ -139,19 +139,17 @@ part5.carte_monde_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
 part5.carte_eurasie_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
 
 #Comparaisons de données
-
-
 last_version_vitesse['Norme'] = np.sqrt((last_version_vitesse['X/Vx']**2 + last_version_vitesse['Y/Vy']**2 +last_version_vitesse['Z/Vz']**2))
 res_proxi['Norme'] = np.sqrt((res_proxi['Vx']**2 + res_proxi['Vy']**2 + res_proxi['Vz']**2))
 
 last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=False)
-res_proxi = res_proxi.sort_values(by=['Vx','Vy'], ascending=False)
+res_proxi = res_proxi.sort_values(by=['Norme'], ascending=False)
 
 print(last_version_vitesse.head(10))
 print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
 
 last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=True)
-res_proxi = res_proxi.sort_values(by=['Vx','Vy'], ascending=True)
+res_proxi = res_proxi.sort_values(by=['Norme'], ascending=True)
 
 print(last_version_vitesse.head(10))
 print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
