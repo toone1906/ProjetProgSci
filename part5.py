@@ -204,4 +204,3 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
 
     print("Carte Eurasie générée.")
     plt.savefig("output/Carte_Eurasie.png",dpi=300, format="png", bbox_inches='tight') 
-

@@ -145,13 +145,19 @@ res_proxi['Norme'] = np.sqrt((res_proxi['Vx']**2 + res_proxi['Vy']**2 + res_prox
 last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=False)
 res_proxi = res_proxi.sort_values(by=['Norme'], ascending=False)
 
+print("10 plus grands déplacement pour des stations \n")
+print("Données de base : \n")
 print(last_version_vitesse.head(10))
+print("Calculés : \n")
 print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
 
 last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=True)
 res_proxi = res_proxi.sort_values(by=['Norme'], ascending=True)
 
+print("10 plus petits déplacement pour des stations \n")
+print("Données de base : \n")
 print(last_version_vitesse.head(10))
+print("Calculés : \n")
 print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
 
 print("\n--- Terminée ---")
