@@ -102,7 +102,7 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=5, fontsize='x-small')
 
     print("Carte générée. Utilisez les outils de la fenêtre pour zoomer/déplacer.")
-    plt.savefig("output/Carte_monde.png", format="png")
+    plt.savefig("output/Carte_Monde.pdf",dpi=300, format="pdf", bbox_inches='tight')
 
 def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     """
@@ -203,5 +203,5 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=5, fontsize='x-small')
 
     print("Carte Eurasie générée.")
-    plt.savefig("output/Carte_Eurasie.png", format="png", bbox_inches='tight') 
+    plt.savefig("output/Carte_Eurasie.pdf",dpi=300, format="pdf", bbox_inches='tight') 
 
