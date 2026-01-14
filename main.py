@@ -148,7 +148,7 @@ last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=
 res_proxi = res_proxi.sort_values(by=['Vx','Vy'], ascending=False)
 
 print(last_version_vitesse.head(10))
-print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz']].head(10))
+print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
 
 last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=True)
 res_proxi = res_proxi.sort_values(by=['Vx','Vy'], ascending=True)
