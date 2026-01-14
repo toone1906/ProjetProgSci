@@ -140,31 +140,31 @@ print(res_proxi)
 
 
     #5
-    print("\nGénération des cartes...")
+print("\nGénération des cartes...")
 
-    part5.carte_monde_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
-    part5.carte_eurasie_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
+part5.carte_monde_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
+part5.carte_eurasie_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
 
     #Comparaisons de données
-    last_version_vitesse['Norme'] = np.sqrt((last_version_vitesse['X/Vx']**2 + last_version_vitesse['Y/Vy']**2 +last_version_vitesse['Z/Vz']**2))
-    res_proxi['Norme'] = np.sqrt((res_proxi['Vx']**2 + res_proxi['Vy']**2 + res_proxi['Vz']**2))
+last_version_vitesse['Norme'] = np.sqrt((last_version_vitesse['X/Vx']**2 + last_version_vitesse['Y/Vy']**2 +last_version_vitesse['Z/Vz']**2))
+res_proxi['Norme'] = np.sqrt((res_proxi['Vx']**2 + res_proxi['Vy']**2 + res_proxi['Vz']**2))
 
-    last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=False)
-    res_proxi = res_proxi.sort_values(by=['Norme'], ascending=False)
+last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=False)
+res_proxi = res_proxi.sort_values(by=['Norme'], ascending=False)
 
-    print("10 plus grands déplacement pour des stations \n")
-    print("Données de base : \n")
-    print(last_version_vitesse.head(10))
-    print("Calculés : \n")
-    print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
+print("10 plus grands déplacement pour des stations \n")
+print("Données de base : \n")
+print(last_version_vitesse.head(10))
+print("Calculés : \n")
+print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
 
-    last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=True)
-    res_proxi = res_proxi.sort_values(by=['Norme'], ascending=True)
+last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=True)
+res_proxi = res_proxi.sort_values(by=['Norme'], ascending=True)
 
-    print("10 plus petits déplacement pour des stations \n")
-    print("Données de base : \n")
-    print(last_version_vitesse.head(10))
-    print("Calculés : \n")
-    print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
+print("10 plus petits déplacement pour des stations \n")
+print("Données de base : \n")
+print(last_version_vitesse.head(10))
+print("Calculés : \n")
+print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
 
-    print("\n--- Terminée ---")
+print("\n--- Terminée ---")
