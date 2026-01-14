@@ -5,12 +5,13 @@ import numpy as np
 
 
 def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
-    """_summary_
+    """
+    Génération d'une image d'une carte statique du monde avec Matplotlib 
 
     Args:
-        dico_plaques (_type_): _description_
-        df_stations (_type_): _description_
-        df_GSRM (_type_): _description_
+        dico_plaques (dico): Dictionnaire de DataFrames représentant les polygones des plaques.
+        df_stations (pd.dataframe): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres) des stations GNSS'.
+        df_GSRM (pd.dataframe): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres) des points de deformation'.
     """
     fig = plt.figure(figsize=(12, 8))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
@@ -105,12 +106,13 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
     plt.show()
 
 def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
-    """_summary_
+    """
+    Génération d'une image d'une carte statique de l'eurasie avec Matplotlib 
 
     Args:
-        dico_plaques (_type_): _description_
-        df_stations (_type_): _description_
-        df_GSRM (_type_): _description_
+        dico_plaques (dico): Dictionnaire de DataFrames représentant les polygones des plaques.
+        df_stations (pd.dataframe): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres) des stations GNSS'.
+        df_GSRM (pd.dataframe): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres) des points de deformation'.
     """
     fig = plt.figure(figsize=(14, 8))
     

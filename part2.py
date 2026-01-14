@@ -51,7 +51,7 @@ def isIn_it(df_points, df_plaques):
     en utilisant un algorithme de ray-casting itératif.
     
     Args:
-        df_points (pd.DataFrame): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres)'.
+        df_points (pd.DataFrame): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres)' des stations GNSS.
         df_plaques (dict): Dictionnaire de DataFrames représentant les polygones des plaques.
         
     Returns:
@@ -68,14 +68,16 @@ def isIn_it(df_points, df_plaques):
     return pd.Series(results, index=df_points.index)
 
 def isIn_mat(df_points, df_plaques):
-    """_summary_
+    """
+    Détermine pour chaque point de df_points dans quelle plaque de df_plaques il se trouve
+    en utilisant un algorithme de ray-casting matriciel avec numpy.
 
     Args:
-        df_points (_type_): _description_
-        df_plaques (_type_): _description_
+        df_points (pd.DataFrame): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres)' des stations GNSS.
+        df_plaques (dict): Dictionnaire de DataFrames représentant les polygones des plaques.
 
     Returns:
-        _type_: _description_
+        pd.Series: Une série avec le nom de la plaque pour chaque point.
     """
     p_lon = df_points['lon(degres)'].values.reshape(-1, 1)
     p_lat = df_points['lat(degres)'].values.reshape(-1, 1)
@@ -113,14 +115,16 @@ def isIn_mat(df_points, df_plaques):
     return pd.Series(results, index=df_points.index)
 
 def isIn_geoPandas(df_points, path):
-    """_summary_
+    """
+    Détermine pour chaque point de df_points dans quelle plaque de df_plaques il se trouve
+    en utilisant la librairie geopandas qui utilise une version améliorée du ray-casting.
 
     Args:
-        df_points (_type_): _description_
-        path (_type_): _description_
+        df_points (pd.DataFrame): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres) des stations GNSS'.
+        path (string): Chemin d'accès du fichier des plaques tectoniques
 
     Returns:
-        _type_: _description_
+        geopandas.Geodataframe: Objet geodataframe jonction entre les plaques tectoniques et les stations GNSS
     """
     gdf_points = geopandas.GeoDataFrame(df_points, geometry=geopandas.points_from_xy(df_points['lon(degres)'], df_points['lat(degres)']), crs="EPSG:4326")
     gdf_plaques = geopandas.read_file(path)
