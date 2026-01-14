@@ -8,7 +8,7 @@ for i in range (0,len(txt)-1,2):
 
 
 def xyz_to_pol(x,y,z): 
-    '''
+    """ _summary_
     Convertit des coordonnées cartésiennes ECEF (X, Y, Z) (Earth-Centered, Earth-Fixed) 
     en coordonnées géographiques (longitude λ, latitude φ) sur un ellipsoïde de référence.
 
@@ -18,15 +18,18 @@ def xyz_to_pol(x,y,z):
       - earth['ae']    : demi-grand axe a (en mètres)
       - earth['1/fe']  : inverse de l'aplatissement (1/f)
 
-    
-    :param: x, y, z : array_like
-        Coordonnées cartésiennes ECEF. Peuvent être des scalaires ou des tableaux
+    Args:
+        x (array_like): Coordonnées cartésiennes ECEF. Peuvent être des scalaires ou des tableaux
         NumPy (formes compatibles entre elles). Unité : mètres.
+        y (array_like): //
+        z (array_like): //
 
-    :rtype: lamb, phi
-        retour des coordonnées géogrpaghiques, sous formes de tableaux numpy ou scalaire. unité : radian. 
-    '''
+    Returns:
+        lamb,phi(array_like): retour des coordonnées géogrpaghiques, sous formes de tableaux numpy 
+                              ou scalaire. unité : radian. 
 
+    """
+   
     ae = float(earth['ae'])
     fe = 1/float(earth['1/fe'])
     ee2 = fe*(2-fe)
@@ -38,30 +41,68 @@ def xyz_to_pol(x,y,z):
 
 #Q4 doit rajouter deux colonnes où on
 def rad_to_degres(rad): 
-    '''
+    """_summary_
     renvoie le tableau le scalire en degres
-    
-    :param rad:  l'angle à convertir en degres
+    Args:
+        rad (float):  l'angle à convertir en degres
 
-    :rtype: le tableau ou le scalaire en degres 
-    '''
+    Returns:
+        float:le tableau ou le scalaire en degres 
+    """
+  
     return rad*180/np.pi
 
 
 def radlon(r): 
-    '''
+    """_summary_
     utilisé dans le main pour passer toutes les coordonées cartésienne des différentes stations en coordonnées
     géographiques (puis de radian à degres), sans passer par une fonction annonyme on utilise alors ses 4 fonctions pour être utilisé dans 
     le .apply de pandas
-    
-    :param r: correspond à la ligne appelé dans le dataframe à chaque fois c'est une série de 3 colonnes qui est appelé
 
-    :rtype: le lamb ou long obtenu pour la station en question 
-    '''
+    Args:
+        r (series (ligne de DataFrame)):correspond à la ligne appelé dans le dataframe à chaque fois c'est une série de 3 colonnes qui est appelé 
+
+    Returns:
+        series: le lamb ou long obtenu pour la station en question  en coordonnés et polaire
+    """
     return xyz_to_pol(r['X/Vx'],r['Y/Vy'],r['Z/Vz'])[0]
+
 def radlat(r): 
+    """_summary_
+    utilisé dans le main pour passer toutes les coordonées cartésienne des différentes stations en coordonnées
+    géographiques (puis de radian à degres), sans passer par une fonction annonyme on utilise alors ses 4 fonctions 
+    pour être utilisé dans le .apply de pandas
+
+    Args:
+        r (series (ligne de DataFrame)):correspond à la ligne appelé dans le dataframe à 
+                                        chaque fois c'est une série de 3 colonnes qui est appelé 
+
+    Returns:
+        series: le lamb ou long obtenu pour la station en question  en coordonnés et polaire donc en radian
+    """
     return xyz_to_pol(r['X/Vx'],r['Y/Vy'],r['Z/Vz'])[1]
+
 def degreslon(r): 
+    """_summary_
+    Il faut avoir les valeurs en degrés 
+    Args:
+        r (series (ligne de DataFrame)):correspond à la ligne appelé dans le dataframe
+                                        à chaque fois c'est une série de 3 colonnes qui est appelé 
+
+    Returns:
+        series: meme chose que radlat mais degres
+    """
     return rad_to_degres(xyz_to_pol(r['X/Vx'],r['Y/Vy'],r['Z/Vz'])[0])
+
 def degreslat(r): 
+    """_summary_
+    Il faut avoir les valeurs en degrés 
+    Args:
+        r (series (ligne de DataFrame)):correspond à la ligne appelé dans le dataframe
+                                        à chaque fois c'est une série de 3 colonnes qui est appelé 
+
+
+    Returns:
+        series: meme chose que radlon mais degres
+    """
     return rad_to_degres(xyz_to_pol(r['X/Vx'],r['Y/Vy'],r['Z/Vz'])[1])
