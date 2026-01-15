@@ -6,72 +6,72 @@ T = (0.37,0.35,0.74)
 sT = (0.08,0.10,0.09)
 
 def v_pred(pmm, ITRF):
-    """
-    Prédit la vitesse des stations GNSS à partir d'un modèle
-    (rotation + translation), puis convertit la vitesse du repère ECEF (XYZ)
-    vers le repère local ENU (East, North, Up).
+  """
+  Prédit la vitesse des stations GNSS à partir d'un modèle
+  (rotation + translation), puis convertit la vitesse du repère ECEF (XYZ)
+  vers le repère local ENU (East, North, Up).
 
-    Le modèle utilisé est :
-        v_xyz = ω x r + T
-    où :
-      - r = (X, Y, Z) est la position ECEF de la station (m),
-      - ω = (Ωx, Ωy, Ωz) est le vecteur de rotation de la plaque (mas/yr),
-      - T est un terme de translation (m/yr),
-      - v_xyz est la vitesse prédite en ECEF (m/yr).
+  Le modèle utilisé est :
+      v_xyz = ω x r + T
+  où :
+    - r = (X, Y, Z) est la position ECEF de la station (m),
+    - ω = (Ωx, Ωy, Ωz) est le vecteur de rotation de la plaque (mas/yr),
+    - T est un terme de translation (m/yr),
+    - v_xyz est la vitesse prédite en ECEF (m/yr).
 
-    La conversion en ENU est faite au point de la station (défini par sa
-    longitude λ et latitude φ, obtenues via part1.xyz_to_pol(X, Y, Z),
-    Parameters
-    ----------
-    pmm : pandas.DataFrame
-        Table des paramètres de plaques. Doit contenir au minimum :
-          - 'Name' : identifiant de plaque (clé de jointure)
-          - 'Omega_x', 'Omega_y', 'Omega_z' : composantes de ω en mas/yr
+  La conversion en ENU est faite au point de la station (défini par sa
+  longitude λ et latitude φ, obtenues via part1.xyz_to_pol(X, Y, Z),
+  Parameters
+  ----------
+  pmm : pandas.DataFrame
+      Table des paramètres de plaques. Doit contenir au minimum :
+        - 'Name' : identifiant de plaque (clé de jointure)
+        - 'Omega_x', 'Omega_y', 'Omega_z' : composantes de ω en mas/yr
 
-        Hypothèse : une seule ligne par plaque (sinon la jointure doit échouer
-        avec `validate="m:1"`).
+      Hypothèse : une seule ligne par plaque (sinon la jointure doit échouer
+      avec `validate="m:1"`).
 
-    ITRF : pandas.DataFrame
-        Table des stations. Doit contenir au minimum :
-          - 'Plate' : identifiant de plaque associée à la station
-          - 'X/Vx', 'Y/Vy', 'Z/Vz' : coordonnées ECEF de la station (m)
+  ITRF : pandas.DataFrame
+      Table des stations. Doit contenir au minimum :
+        - 'Plate' : identifiant de plaque associée à la station
+        - 'X/Vx', 'Y/Vy', 'Z/Vz' : coordonnées ECEF de la station (m)
 
-    Returns
-    -------
-    ITRFcop : pandas.DataFrame
-        Copie de ITRF  avec :
-          - 'VE', 'VN', 'VU' : composantes de la vitesse prédite en ENU (m/yr)
+  Returns
+  -------
+  ITRFcop : pandas.DataFrame
+      Copie de ITRF  avec :
+        - 'VE', 'VN', 'VU' : composantes de la vitesse prédite en ENU (m/yr)
 
-        La fonction ne conserve pas explicitement les composantes ECEF dans des
-        colonnes (Vx_pred, Vy_pred, Vz_pred), mais elles sont calculées en
-        interne.     
-    """
-    ITRFcop = ITRF.copy()
-    merge_ITRF = ITRFcop.merge(pmm[["Name", "Omega_x", "Omega_y", "Omega_z"]],left_on="Plate",right_on="Name",how="left",validate="m:1")
-    omega = merge_ITRF[["Omega_x", "Omega_y", "Omega_z"]].to_numpy()  # mas/yr
-    coord = merge_ITRF[["X/Vx", "Y/Vy", "Z/Vz"]].to_numpy()  # m
+      La fonction ne conserve pas explicitement les composantes ECEF dans des
+      colonnes (Vx_pred, Vy_pred, Vz_pred), mais elles sont calculées en
+      interne.     
+  """
+  ITRFcop = ITRF.copy()
+  merge_ITRF = ITRFcop.merge(pmm[["Name", "Omega_x", "Omega_y", "Omega_z"]],left_on="Plate",right_on="Name",how="left",validate="m:1")
+  omega = merge_ITRF[["Omega_x", "Omega_y", "Omega_z"]].to_numpy()  # mas/yr
+  coord = merge_ITRF[["X/Vx", "Y/Vy", "Z/Vz"]].to_numpy()  # m
 
-    T = np.array([0.37, 0.35, 0.74]) * 0.001  # m/yr (à partir de mm/yr)
-    MAS_TO_RAD = np.deg2rad(1 / 3600 / 1000)  # rad/mas
-    omegarad = omega * MAS_TO_RAD  # rad/yr
+  T = np.array([0.37, 0.35, 0.74]) * 0.001  # m/yr (à partir de mm/yr)
+  MAS_TO_RAD = np.deg2rad(1 / 3600 / 1000)  # rad/mas
+  omegarad = omega * MAS_TO_RAD  # rad/yr
 
-    v = np.cross(omegarad, coord) + T  # m/yr
-    Vx, Vy, Vz = v[:, 0], v[:, 1], v[:, 2]
+  v = np.cross(omegarad, coord) + T  # m/yr
+  Vx, Vy, Vz = v[:, 0], v[:, 1], v[:, 2]
 
-    X, Y, Z = coord[:, 0], coord[:, 1], coord[:, 2]
-    vlamb, vphi = part1.xyz_to_pol(X, Y, Z)
+  X, Y, Z = coord[:, 0], coord[:, 1], coord[:, 2]
+  vlamb, vphi = part1.xyz_to_pol(X, Y, Z)
 
-    sinphi, cosphi = np.sin(vphi), np.cos(vphi)
-    sinlamb, coslamb = np.sin(vlamb), np.cos(vlamb)
+  sinphi, cosphi = np.sin(vphi), np.cos(vphi)
+  sinlamb, coslamb = np.sin(vlamb), np.cos(vlamb)
 
-    Ve = -sinlamb * Vx + coslamb * Vy
-    Vn = -sinphi * coslamb * Vx + -sinphi * sinlamb * Vy + cosphi * Vz
-    Vu = cosphi * coslamb * Vx + cosphi * sinlamb * Vy + sinphi * Vz
+  Ve = -sinlamb * Vx + coslamb * Vy
+  Vn = -sinphi * coslamb * Vx + -sinphi * sinlamb * Vy + cosphi * Vz
+  Vu = cosphi * coslamb * Vx + cosphi * sinlamb * Vy + sinphi * Vz
 
-    VENU = np.column_stack((Ve, Vn, Vu))
-    ITRFcop[["VE", "VN", "VU"]] = VENU
-
-    return ITRFcop
+  VENU = np.column_stack((Ve, Vn, Vu))
+  ITRFcop[["VE", "VN", "VU"]] = VENU
+  ITRFcop[["Vx", "Vy", "Vz"]] = v
+  return ITRFcop
 
 
 

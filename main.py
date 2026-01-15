@@ -131,7 +131,8 @@ with tqdm(total=3, desc="Chargement fichiers") as pbar:
     print(f'Temps calcul déformation : {d1-d:.2f}s')
 
 #4
-incertitude_proxi = part4.incertitude_vitesse(pmm_itrf,res_proxi)
+
+incertitude_proxi = part4.incertitude_vitesse(pmm_itrf,res_proxi) # incertitude ajouter
 res_proxi = part4.v_pred(pmm_itrf,incertitude_proxi)
 
 
