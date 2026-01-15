@@ -21,16 +21,16 @@ if __name__ == "__main__":
     print("--- Démarrage du chargement des données ---")
     with tqdm(total=3, desc="Chargement fichiers") as pbar:
         
-        colspecs_ITRF = [(0, 9),(10, 25), (26,30),(32, 36),(37, 50),(51, 64),(65, 79),(80, 85),(86, 92),(93, 99),(100, 102),(103, 115),(116, 128)]
+        colspecs_ITRF = [(0, 9),(10, 25), (26,30),(32, 36),(37, 50),(51, 64),(65, 79),(79, 85),(86, 92),(93, 99),(100, 102),(103, 115),(116, 128)]
         ITRF_2020 = pd.read_fwf("data/ITRF2020_GNSS.SSC.txt", skiprows=8,colspecs=colspecs_ITRF, names=["DOMES NB", "SITE NAME", "TECH","ID", "X/Vx","Y/Vy","Z/Vz","Sigma_x","Sigma_y","Sigma_z","SOLN","DATA_START","DATA_END"] )
-        pmm_itrf = pd.read_csv("data/pmm_itrf.txt",sep='\s+',skiprows=4,names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS_E","WRMS_N","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"])
+        pmm_itrf = pd.read_csv("data/pmm_itrf.txt",sep=r'\s+',skiprows=4,names=["Plate", "Name", "NS","Omega_x", "Omega_y","Omega_z","Omega","WRMS_E","WRMS_N","s_Omega_x","s_Omega_y","s_Omega_z","s_Omega"],engine='c')
         pbar.update(1)
         
         with open("data/Tectonic_Plates.geojson") as f:
             Plaques_Techtoniques = json.load(f)
         pbar.update(1)
         
-        GSRM = pd.read_csv("data/GSRM_strain.txt",skiprows=25,sep='\s+',names=["lat","long", "exx","eyy","exy","vorticity","RL-NLC","LL-NLC","e1","e2","azi_e1"],engine='c' )
+        GSRM = pd.read_csv("data/GSRM_strain.txt",skiprows=25,sep=r'\s+',names=["lat","long", "exx","eyy","exy","vorticity","RL-NLC","LL-NLC","e1","e2","azi_e1"],engine='c' )
         pbar.update(1)
 
         d2 = time.time()
@@ -44,8 +44,7 @@ if __name__ == "__main__":
 
         last_version_vitesse = tmp.drop_duplicates(subset='DOMES_base',keep='last').drop(columns='DOMES_base')
 
-        last_version_vitesse = last_version_vitesse.loc[:, ['DOMES NB', 'X/Vx', 'Y/Vy','Z/Vz']]
-
+        last_version_vitesse = last_version_vitesse.loc[:, ['DOMES NB', 'X/Vx', 'Y/Vy','Z/Vz','Sigma_x','Sigma_y','Sigma_z']]
         #1.1.3 : Conversion cartésien -> lat/lon
         print("\nConversion des coordonnées")
 
@@ -147,8 +146,10 @@ if __name__ == "__main__":
     part5.carte_eurasie_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
 
         #Comparaisons de données
-    last_version_vitesse['Norme'] = np.sqrt((last_version_vitesse['X/Vx']**2 + last_version_vitesse['Y/Vy']**2 +last_version_vitesse['Z/Vz']**2))
-    res_proxi['Norme'] = np.sqrt((res_proxi['Vx']**2 + res_proxi['Vy']**2 + res_proxi['Vz']**2))
+    #last_version_vitesse['Norme'] = np.sqrt((last_version_vitesse['X/Vx']**2 + last_version_vitesse['Y/Vy']**2 +last_version_vitesse['Z/Vz']**2))
+    res_proxi['Norme'] = part4.norme_v(res_proxi[["Vx", "Vy", "Vz"]].to_numpy() )
+    last_version_vitesse['Norme'] = part4.norme_v(last_version_vitesse[["X/Vx", "Y/Vy", "Z/Vz"]].to_numpy() )
+
 
     last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=False)
     res_proxi = res_proxi.sort_values(by=['Norme'], ascending=False)
@@ -167,5 +168,11 @@ if __name__ == "__main__":
     print(last_version_vitesse.head(10))
     print("Calculés : \n")
     print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
+    
+    conclusion = part4.z_score(res_proxi,last_version_vitesse)
+    #suppression des stations sur plaque inconnu 
+    conclusion = conclusion.loc[conclusion["z_score"].notna()]
+    conclusion = conclusion.sort_values(by=['z_score'], ascending=False)
+    print(conclusion)
 
     print("\n--- Terminée ---")

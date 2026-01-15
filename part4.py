@@ -69,8 +69,9 @@ def v_pred(pmm, ITRF):
   Vu = cosphi * coslamb * Vx + cosphi * sinlamb * Vy + sinphi * Vz
 
   VENU = np.column_stack((Ve, Vn, Vu))
-  ITRFcop[["VE", "VN", "VU"]] = VENU
   ITRFcop[["Vx", "Vy", "Vz"]] = v
+  ITRFcop[["VE", "VN", "VU"]] = VENU
+  
   return ITRFcop
 
 
@@ -120,12 +121,36 @@ def incertitude_vitesse(pmm,ITRF):
   ITRF_cop[["sigma_Vx","sigma_Vy","sigma_Vz"]] = sV
   return ITRF_cop
 
-def z_score(donne,ITRF): 
-   return
 
-def norme_v (tabv): 
+
+def norme_v (v):       #tableau de dimension 3 en entrer
+
   Vx, Vy,Vz = v[:,0],v[:,1],v[:,2]
   return np.sqrt(Vx**2+Vy**2+Vz**2)
 
+def z_score(calcule,donne): 
+  ITRFcop = calcule.copy()
+  mergeITRF = ITRFcop.merge(donne, on = 'DOMES NB', suffixes = ('_ITRF','_vitesse'))
 
+  sVx_vitesse, sVy_vitesse,sVz_vitesse = mergeITRF[['Sigma_x_vitesse','Sigma_y_vitesse','Sigma_z_vitesse']].to_numpy().T
+  Vx_vitesse, Vy_vitesse, Vz_vitesse = mergeITRF[['X/Vx_vitesse','Y/Vy_vitesse','Z/Vz_vitesse']].to_numpy().T
+  norme_vitesse = mergeITRF['Norme_vitesse'].to_numpy()
+  snorme_vitesse = 1/norme_vitesse * np.sqrt((Vx_vitesse**2)*(sVx_vitesse**2) + (Vy_vitesse**2)*(sVy_vitesse**2) + (Vz_vitesse**2)*(sVz_vitesse**2))
+  
+  norme_recalc = np.sqrt(Vx_vitesse**2 + Vy_vitesse**2 + Vz_vitesse**2)
+  ratio = norme_recalc / norme_vitesse
+  print("ratio min/med/max:", np.nanmin(ratio), np.nanmedian(ratio), np.nanmax(ratio))
+
+  sVx_calcule, sVy_calcule, sVz_calcule = mergeITRF[['sigma_Vx','sigma_Vy','sigma_Vz']].to_numpy().T
+  Vx_calcule, Vy_calcule, Vz_calcule =  mergeITRF[['Vx','Vy', 'Vz']].to_numpy().T
+  norme_calcule = mergeITRF['Norme_ITRF'].to_numpy()
+  snorme_calcule = 1/norme_calcule *  np.sqrt((Vx_calcule**2)*(sVx_calcule**2) + (Vy_calcule**2)*(sVy_calcule**2) + (Vz_calcule**2)*(sVz_calcule**2))
+  print('norme°cal', snorme_calcule,snorme_vitesse)
+  snorme = np.sqrt(snorme_vitesse**2 + snorme_calcule**2)
+  z_score = abs(norme_calcule-norme_vitesse)/ snorme
+  mergeITRF["z_score"] = z_score
+
+
+
+  return mergeITRF[["DOMES NB", "Norme_vitesse", "Norme_ITRF","z_score", "in_deformation"]]
 
