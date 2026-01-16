@@ -66,7 +66,7 @@ if __name__ == "__main__":
     for feature in tqdm(features_list, desc="Analyse géométrie plaques"):
         nom = feature["properties"]["PlateName"]
         coords = feature["geometry"]["coordinates"]
-        type_geom = feature["geometry"]["type"] # renmmé 'type' en 'type_geom' pour éviter conflit mot-clé python
+        type_geom = feature["geometry"]["type"] # renommé 'type' en 'type_geom' pour éviter conflit mot-clé python
         
         points = []
         if type_geom == "Polygon":
