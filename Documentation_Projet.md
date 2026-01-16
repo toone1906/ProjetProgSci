@@ -300,4 +300,3 @@ Généré automatiquement pour : main.py, part1.py, part2.py, part3.py, part4.py
 >     df_GSRM (pd.dataframe): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres) des points de deformation'.
 
 ---
-

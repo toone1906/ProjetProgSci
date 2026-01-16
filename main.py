@@ -135,12 +135,10 @@ if __name__ == "__main__":
     res_proxi = part4.v_pred(pmm_itrf,incertitude_proxi)
 
 
-
-    print(res_proxi)
-
+    
 
         #5
-    print("\nGénération des cartes...")
+    print("\nGénération des cartes...\n")
 
     part5.carte_monde_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
     part5.carte_eurasie_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
@@ -154,19 +152,19 @@ if __name__ == "__main__":
     last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=False)
     res_proxi = res_proxi.sort_values(by=['Norme'], ascending=False)
 
-    print("10 plus grands déplacement pour des stations \n")
+    print("\n10 plus grands déplacement pour des stations \n")
     print("Données de base : \n")
     print(last_version_vitesse.head(10))
-    print("Calculés : \n")
+    print("\nCalculés : \n")
     print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
 
     last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=True)
     res_proxi = res_proxi.sort_values(by=['Norme'], ascending=True)
 
-    print("10 plus petits déplacement pour des stations \n")
+    print("\n10 plus petits déplacement pour des stations \n")
     print("Données de base : \n")
     print(last_version_vitesse.head(10))
-    print("Calculés : \n")
+    print("\nCalculés : \n")
     print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
     
     conclusion = part4.z_score(res_proxi,last_version_vitesse)
@@ -174,9 +172,9 @@ if __name__ == "__main__":
     conclusion = conclusion.loc[conclusion["z_score"].notna()]
     conclusion_decroiss = conclusion.sort_values(by=['z_score'], ascending=False)
     conclusion_croiss =  conclusion.sort_values(by=['z_score'], ascending=True)
-    print("15 plus petit z-score  \n")
+    print("\n15 plus petit z-score : \n")
     print(conclusion_croiss.head(15))
-    print("\n 15 plus grand z-score  \n")
+    print("\n 15 plus grand z-score : \n")
     print(conclusion_decroiss.head(20))
 
     print("\n--- Terminée ---")
