@@ -172,7 +172,11 @@ if __name__ == "__main__":
     conclusion = part4.z_score(res_proxi,last_version_vitesse)
     #suppression des stations sur plaque inconnu 
     conclusion = conclusion.loc[conclusion["z_score"].notna()]
-    conclusion = conclusion.sort_values(by=['z_score'], ascending=False)
-    print(conclusion)
+    conclusion_decroiss = conclusion.sort_values(by=['z_score'], ascending=False)
+    conclusion_croiss =  conclusion.sort_values(by=['z_score'], ascending=True)
+    print("15 plus petit z-score  \n")
+    print(conclusion_croiss.head(15))
+    print("\n 15 plus grand z-score  \n")
+    print(conclusion_decroiss.head(20))
 
     print("\n--- Terminée ---")
