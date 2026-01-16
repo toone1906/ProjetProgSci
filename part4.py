@@ -59,16 +59,19 @@ def v_pred(pmm, ITRF):
   Vx, Vy, Vz = v[:, 0], v[:, 1], v[:, 2]
 
   X, Y, Z = coord[:, 0], coord[:, 1], coord[:, 2]
-  vlamb, vphi = part1.xyz_to_pol(X, Y, Z)
 
-  sinphi, cosphi = np.sin(vphi), np.cos(vphi)
+  #calcul des coordonnées géograpgiques des statios
+  vlamb, vphi = part1.xyz_to_pol(X, Y, Z)
+  sinphi, cosphi = np.sin(vphi), np.cos(vphi) #en rad
   sinlamb, coslamb = np.sin(vlamb), np.cos(vlamb)
 
+  # Calcul composante repère ENU
   Ve = -sinlamb * Vx + coslamb * Vy
   Vn = -sinphi * coslamb * Vx + -sinphi * sinlamb * Vy + cosphi * Vz
   Vu = cosphi * coslamb * Vx + cosphi * sinlamb * Vy + sinphi * Vz
-
+  #Tableau (N,3)
   VENU = np.column_stack((Ve, Vn, Vu))
+  #ajout des colonnes Vx Vy et vZ, Ve VN et VU
   ITRFcop[["Vx", "Vy", "Vz"]] = v
   ITRFcop[["VE", "VN", "VU"]] = VENU
   
@@ -79,10 +82,41 @@ def v_pred(pmm, ITRF):
 
 def incertitude_vitesse(pmm,ITRF): 
   """_summary_
+  Calcule les incertitudes-type (écarts-types, 1σ) des composantes de vitesse
+  prédite en repère cartésien ECEF (Vx, Vy, Vz), par propagation d'incertitudes
+  en supposant toutes les variables indépendantes.
+
+- Vx = Wy*Z - Wz*Y + Tx
+- Vy = Wz*X - Wx*Z + Ty
+- Vz = Wx*Y - Wy*X + Tz
+
+  Propagation d'incertitudes (indépendance)
+  -----------------------------------------
+  On utilise la règle (approximation au 1er ordre) :
+    s(a*b) ≈ sqrt ( b² * s(a)² + a² s(b)²
+    et on peut simplement sommet dans l'incertitude de gauche
 
   Args:
-      pmm (_type_): _description_
-      ITRF (_type_): _description_
+pmm : pandas.DataFrame
+        DataFrame des paramètres de plaques. Doit contenir au minimum :
+          - 'Name' : identifiant de plaque (clé de jointure)
+          - 'Omega_x', 'Omega_y', 'Omega_z' : composantes de ω (mas/yr)
+          - 's_Omega_x', 's_Omega_y', 's_Omega_z' : incertitudes-type sur ω (mas/yr)
+
+        Hypothèse : une ligne par plaque (contrôlée par validate="m:1").
+
+    ITRF : pandas.DataFrame
+        DataFrame des stations. Doit contenir au minimum :
+          - 'Plate' : identifiant de plaque associée à la station
+          - 'X/Vx', 'Y/Vy', 'Z/Vz' : coordonnées ECEF de la station (m)
+          - 'Sigma_x', 'Sigma_y', 'Sigma_z' : incertitudes-type sur X,Y,Z (m)
+
+  Returns
+  -------
+  ITRF_cop : pandas.DataFrame
+      Copie de `TRF enrichie avec les colonnes :
+        -'sigma_Vx,' 'sigma_Vy', 'sigma_Vz' : incertitudes-type sur les composantes de vitesse ECEF (m/yr).
+
   """
   sT = np.array([0.08,0.35,0.09])* 1E-3 # m/yr
   sTx, sTy, sTz = sT
@@ -124,33 +158,73 @@ def incertitude_vitesse(pmm,ITRF):
 
 
 def norme_v (v):       #tableau de dimension 3 en entrer
+  """_summary_
+permet de retourner la norne d'un tableau numpy en entrer de taille n,3 (vecteurs de 3 dimension)
+  Args:
+      v (np.arrray): tableau rassemblant des vecteurs 3D vitesses
+
+  Returns:
+      np.arry : tableau  n,1 des normes des vecteurs
+  """
 
   Vx, Vy,Vz = v[:,0],v[:,1],v[:,2]
   return np.sqrt(Vx**2+Vy**2+Vz**2)
 
 def z_score(calcule,donne): 
+  """_summary_
+  Calcule un z-score de cohérence entre une vitesse qui est donné  dans ITRF2020 et une
+  vitesse "calculée/prédite", en comparant leurs normes et en combinant leurs incertitudes-type (1σ).
+  Pour information un z-score qui validerai nos calculs doit être inférieur à 2. 
+  rappel calcul : 
+  z = abs( ||v_cal|| - ||v_obs|| ) / s
+  avec l'incertitude combiné :  s = sqrt( s_obs^2 + s_cal^2 )
+  Args:
+      calcule : pandas.DataFrame
+      DataFrame contenant les vitesses "calculées" en ECEF et leurs incertitudes
+      sur composantes. Doit contenir au minimum :
+        - 'DOMES NB' : identifiant station (clé de jointure)
+        - 'Vx', 'Vy', 'Vz' : composantes ECEF de vitesse calculée
+        - 'sigma_Vx', 'sigma_Vy', 'sigma_Vz' : incertitudes-type sur Vx,Vy,Vz
+        - 'Norme_ITRF' : norme de la vitesse calculée (||v_cal||)
+
+  donne : pandas.DataFrame
+      DataFrame contenant les vitesses "observées" (ou provenant d'un autre
+      jeu de données) et leurs incertitudes sur composantes. Doit contenir au
+      minimum :
+        - 'DOMES NB' : identifiant station (clé de jointure)
+        - 'X/Vx_vitesse', 'Y/Vy_vitesse', 'Z/Vz_vitesse' : composantes ECEF observées
+        - 'Sigma_x_vitesse', 'Sigma_y_vitesse', 'Sigma_z_vitesse' : incertitudes-type
+        - 'Norme_vitesse' : norme observée (||v_obs||)
+        - 'in_deformation' : indicateur/flag (renvoyé tel quel)
+
+
+  Returns:
+      _type_: _description_
+  """
   ITRFcop = calcule.copy()
   mergeITRF = ITRFcop.merge(donne, on = 'DOMES NB', suffixes = ('_ITRF','_vitesse'))
 
   sVx_vitesse, sVy_vitesse,sVz_vitesse = mergeITRF[['Sigma_x_vitesse','Sigma_y_vitesse','Sigma_z_vitesse']].to_numpy().T
   Vx_vitesse, Vy_vitesse, Vz_vitesse = mergeITRF[['X/Vx_vitesse','Y/Vy_vitesse','Z/Vz_vitesse']].to_numpy().T
   norme_vitesse = mergeITRF['Norme_vitesse'].to_numpy()
+  #calcul de l'incertitude des normes données
   snorme_vitesse = 1/norme_vitesse * np.sqrt((Vx_vitesse**2)*(sVx_vitesse**2) + (Vy_vitesse**2)*(sVy_vitesse**2) + (Vz_vitesse**2)*(sVz_vitesse**2))
   
-  norme_recalc = np.sqrt(Vx_vitesse**2 + Vy_vitesse**2 + Vz_vitesse**2)
-  ratio = norme_recalc / norme_vitesse
-  print("ratio min/med/max:", np.nanmin(ratio), np.nanmedian(ratio), np.nanmax(ratio))
-
   sVx_calcule, sVy_calcule, sVz_calcule = mergeITRF[['sigma_Vx','sigma_Vy','sigma_Vz']].to_numpy().T
   Vx_calcule, Vy_calcule, Vz_calcule =  mergeITRF[['Vx','Vy', 'Vz']].to_numpy().T
   norme_calcule = mergeITRF['Norme_ITRF'].to_numpy()
+  
+  #calcul de l'incertitude des normes qu'on a calculé
   snorme_calcule = 1/norme_calcule *  np.sqrt((Vx_calcule**2)*(sVx_calcule**2) + (Vy_calcule**2)*(sVy_calcule**2) + (Vz_calcule**2)*(sVz_calcule**2))
-  print('norme°cal', snorme_calcule,snorme_vitesse)
+  
+  #incertitude combinée des deux
   snorme = np.sqrt(snorme_vitesse**2 + snorme_calcule**2)
+  #calcul du z-score
   z_score = abs(norme_calcule-norme_vitesse)/ snorme
-  mergeITRF["z_score"] = z_score
+
+  mergeITRF["z_score"] = z_score # ajout d'une colone z-score dans le dataframe
 
 
 
-  return mergeITRF[["DOMES NB", "Norme_vitesse", "Norme_ITRF","z_score", "in_deformation"]]
+  return mergeITRF[["DOMES NB", "Norme_vitesse", "Norme_ITRF","z_score", "in_deformation"]] 
 

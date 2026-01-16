@@ -19,13 +19,13 @@ def xyz_to_pol(x,y,z):
       - earth['1/fe']  : inverse de l'aplatissement (1/f)
 
     Args:
-        x (array_like): Coordonnées cartésiennes ECEF. Peuvent être des scalaires ou des tableaux
+        x (np.array): Coordonnées cartésiennes ECEF. Peuvent être des scalaires ou des tableaux
         NumPy (formes compatibles entre elles). Unité : mètres.
-        y (array_like): //
-        z (array_like): //
+        y (np.array): //
+        z (np.array): //
 
     Returns:
-        lamb,phi(array_like): retour des coordonnées géogrpaghiques, sous formes de tableaux numpy 
+        lamb,phi(np.array): retour des coordonnées géogrpaghiques, sous formes de tableaux numpy 
                               ou scalaire. unité : radian. 
 
     """
