@@ -199,7 +199,9 @@ def z_score(calcule,donne):
 
 
   Returns:
-      _type_: _description_
+      pandas.dataframe: tableau du merge où on a choisi les colonnes qui nous interesse dont 
+      le z-score. Permettant de l'afficher dans le main avec les id des stations et leurs normes
+      de vitesse.
   """
   ITRFcop = calcule.copy()
   mergeITRF = ITRFcop.merge(donne, on = 'DOMES NB', suffixes = ('_ITRF','_vitesse'))
@@ -226,5 +228,5 @@ def z_score(calcule,donne):
 
 
 
-  return mergeITRF[["DOMES NB", "Norme_vitesse", "Norme_ITRF","z_score", "in_deformation"]] 
+  return mergeITRF[["SITE NAME","DOMES NB", "Norme_vitesse", "Norme_ITRF","z_score", "in_deformation"]] 
 
