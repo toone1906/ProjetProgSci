@@ -150,6 +150,10 @@ if __name__ == "__main__":
     res_proxi['Norme'] = part4.norme_v(res_proxi[["Vx", "Vy", "Vz"]].to_numpy() )
     last_version_vitesse['Norme'] = part4.norme_v(last_version_vitesse[["X/Vx", "Y/Vy", "Z/Vz"]].to_numpy() )
 
+    # Création du dataframe avec la moyenne des normes par plaques
+    df_moyenne_normes = res_proxi.groupby('Plate')['Norme'].mean().reset_index(name='Moyenne_Norme').sort_values(by=['Moyenne_Norme'], ascending=False)
+    print("\nMoyenne des normes par plaques :")
+    print(df_moyenne_normes)
 
     last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=False)
     res_proxi = res_proxi.sort_values(by=['Norme'], ascending=False)
@@ -175,8 +179,16 @@ if __name__ == "__main__":
     conclusion_decroiss = conclusion.sort_values(by=['z_score'], ascending=False)
     conclusion_croiss =  conclusion.sort_values(by=['z_score'], ascending=True)
     print("15 plus petit z-score  \n")
-    print(conclusion_croiss.head(15))
+    print(conclusion_croiss.head(10))
     print("\n 15 plus grand z-score  \n")
-    print(conclusion_decroiss.head(20))
+    print(conclusion_decroiss.head(10))
+    
+    print("\nZ Score moyen  \n")
+    print(np.mean(conclusion["z_score"]))
+
+    print("\nZ Score moyen  hors zones de deformations\n")
+    print(np.mean(conclusion["z_score" ].where(conclusion['in_deformation']==False)))
+    
+    
 
     print("\n--- Terminée ---")

@@ -16,6 +16,8 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
     fig = plt.figure(figsize=(12, 8))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
     
+    ax.stock_img()
+    
     ax.add_feature(cfeature.COASTLINE, linewidth=0.5)
     ax.add_feature(cfeature.BORDERS, linestyle=':', alpha=0.5)
     ax.add_feature(cfeature.LAND, facecolor='lightgray', alpha=0.3)
@@ -24,23 +26,30 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
 
     colors = plt.cm.tab20.colors 
     
-
     scatter = ax.scatter(df_GSRM['long'], df_GSRM['lat'],
+                            transform=ccrs.PlateCarree(),
+                            color='orange', 
+                            s=15,  
+                            marker='o',
+                            label='Deformation',
+                            zorder=3,
+                            alpha=0.5) 
+    
+    scatter = ax.scatter(df_stations['lon(degres)'].where(df_stations['Plate'] != 'Unknown'), df_stations['lat(degres)'].where(df_stations['Plate'] != 'Unknown'),
                           transform=ccrs.PlateCarree(),
-                          color='orange', 
+                          color='red', 
                           s=15,  
                           marker='o',
-                          label='Deformation',
-                          zorder=3,
-                          alpha=0.5) 
-
-    scatter = ax.scatter(df_stations['lon(degres)'], df_stations['lat(degres)'],
-                         transform=ccrs.PlateCarree(),
-                         color='red', 
-                         s=10, 
-                         marker='o',
-                         label='Stations GNSS',
-                         zorder=10) 
+                          label='Stations GNSS',
+                          zorder=10) 
+    
+    scatter = ax.scatter(df_stations['lon(degres)'].where(df_stations['Plate'] == 'Unknown'), df_stations['lat(degres)'].where(df_stations['Plate'] == 'Unknown'),
+                          transform=ccrs.PlateCarree(),
+                          color='purple', 
+                          s=15,  
+                          marker='*',
+                          label='Stations GNSS sans plques',
+                          zorder=10)  
     
     for i, (nom_plaque, df_plaque) in enumerate(dico_plaques.items()):
         color = colors[i % len(colors)]
@@ -50,14 +59,7 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
                 color=color, 
                 linewidth=1.5,
                 zorder=5)
-           
-    scatter = ax.scatter(df_stations['lon(degres)'], df_stations['lat(degres)'],
-                          transform=ccrs.PlateCarree(),
-                          color='red', 
-                          s=15,  
-                          marker='o',
-                          label='Stations GNSS',
-                          zorder=10) 
+
     SCALE_FACTOR = 0.15
     
     mask = df_stations['in_deformation'] == False
@@ -79,7 +81,7 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
     q2 = ax.quiver(df_stations.loc[mask2, 'lon(degres)'].values, df_stations.loc[mask2,'lat(degres)'].values,
                   df_stations.loc[mask2,'VE'].values, df_stations.loc[mask2,'VN'].values,
                   transform=ccrs.PlateCarree(),
-                  color='lightblue',        
+                  color='green',        
                   width=0.002,           
                   headwidth=2,         
                   headlength=2,            
@@ -99,6 +101,8 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
 
     ax.set_title("Plaques Tectoniques et Stations GNSS")
 
+    plt.style.use('seaborn-v0_8-whitegrid')
+    
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=5, fontsize='x-small')
 
     print("Carte générée.")
@@ -116,6 +120,8 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     fig = plt.figure(figsize=(14, 8))
     
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+    
+    ax.stock_img()
     
     ax.set_extent([-30, 150, 10, 87], crs=ccrs.PlateCarree())
  
@@ -152,13 +158,22 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
                 linewidth=linewidth,
                 zorder=5)
 
-    scatter = ax.scatter(df_stations['lon(degres)'], df_stations['lat(degres)'],
+    scatter = ax.scatter(df_stations['lon(degres)'].where(df_stations['Plate'] != 'Unknown'), df_stations['lat(degres)'].where(df_stations['Plate'] != 'Unknown'),
                           transform=ccrs.PlateCarree(),
                           color='red', 
                           s=15,  
                           marker='o',
                           label='Stations GNSS',
                           zorder=10) 
+    
+    scatter = ax.scatter(df_stations['lon(degres)'].where(df_stations['Plate'] == 'Unknown'), df_stations['lat(degres)'].where(df_stations['Plate'] == 'Unknown'),
+                          transform=ccrs.PlateCarree(),
+                          color='purple', 
+                          s=15,  
+                          marker='*',
+                          label='Stations GNSS sans plques',
+                          zorder=10) 
+    
     SCALE_FACTOR = 0.15
     
     mask = df_stations['in_deformation'] == False
@@ -180,7 +195,7 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
     q2 = ax.quiver(df_stations.loc[mask2, 'lon(degres)'].values, df_stations.loc[mask2,'lat(degres)'].values,
                   df_stations.loc[mask2,'VE'].values, df_stations.loc[mask2,'VN'].values,
                   transform=ccrs.PlateCarree(),
-                  color='lightblue',        
+                  color='green',        
                   width=0.002,           
                   headwidth=2,         
                   headlength=2,            
@@ -200,6 +215,8 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
 
     ax.set_title("Focus : Plaque Eurasie et Stations GNSS")
 
+    plt.style.use('seaborn-v0_8-whitegrid')
+    
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=5, fontsize='x-small')
 
     print("Carte Eurasie générée.")
