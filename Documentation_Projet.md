@@ -277,7 +277,9 @@ Généré automatiquement pour : main.py, part1.py, part2.py, part3.py, part4.py
 > 
 > 
 > Returns:
->     _type_: _description_
+>     pandas.dataframe: tableau du merge où on a choisi les colonnes qui nous interesse dont 
+>     le z-score. Permettant de l'afficher dans le main avec les id des stations et leurs normes
+>     de vitesse.
 
 ---
 
@@ -300,3 +302,4 @@ Généré automatiquement pour : main.py, part1.py, part2.py, part3.py, part4.py
 >     df_GSRM (pd.dataframe): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres) des points de deformation'.
 
 ---
+
