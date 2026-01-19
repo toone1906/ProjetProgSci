@@ -183,6 +183,7 @@ if __name__ == "__main__":
     
     print("\nZ Score moyen  \n")
     print(np.mean(conclusion["z_score"]))
+    print(np.mean(conclusion["z_score"]))
 
     print("\nZ Score moyen  hors zones de deformations\n")
     print(np.mean(conclusion["z_score" ].where(conclusion['in_deformation']==False)))
