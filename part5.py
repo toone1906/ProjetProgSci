@@ -88,7 +88,7 @@ def carte_monde_statique(dico_plaques, df_stations, df_GSRM):
                   scale=SCALE_FACTOR,      
                   scale_units='inches',   
                   zorder=15,               
-                  label='Vitesse prédite')
+                  label='Vitesse prédite zone de deformation')
     
     REF_VELOCITY = 0.05
     
@@ -202,7 +202,7 @@ def carte_eurasie_statique(dico_plaques, df_stations, df_GSRM):
                   scale=SCALE_FACTOR,      
                   scale_units='inches',   
                   zorder=15,               
-                  label='Vitesse prédite')
+                  label='Vitesse prédite zone de deformation')
     REF_VELOCITY = 0.05 
     
     ax.quiverkey(q, 

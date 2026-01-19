@@ -2,7 +2,7 @@ import ast
 import glob
 import os
 
-def extract_docstrings_to_markdown(output_file="Documentation_Projet.md"):
+def extract_docstrings_to_markdown(output_file="output/Documentation_Projet.md"):
 
     files = sorted(glob.glob("*.py"))
 
