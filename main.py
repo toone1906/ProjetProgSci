@@ -186,7 +186,8 @@ if __name__ == "__main__":
 
     print("\nZ Score moyen  hors zones de deformations\n")
     print(np.mean(conclusion["z_score" ].where(conclusion['in_deformation']==False)))
-    
+    print("z_score très légérement supérieur à 2, on peut difficlement conclure sur \n la vitesse des stations dans les zones de non déformation")
+    conclusion[["SITE NAME","z_score","in_deformation"]].to_csv("tableau_z_score.csv")
     
 
     print("\n--- Terminée ---")
