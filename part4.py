@@ -228,5 +228,5 @@ def z_score(calcule,donne):
 
 
 
-  return mergeITRF[["SITE NAME","DOMES NB", "Norme_vitesse", "Norme_ITRF","z_score", "in_deformation"]] 
+  return mergeITRF[["SITE NAME","DOMES NB", "Norme_vitesse", "Norme_ITRF","z_score", "in_deformation", "Plate"]] 
 

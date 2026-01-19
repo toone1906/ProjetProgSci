@@ -63,7 +63,7 @@ def isIn_it(df_points, df_plaques):
     
     for index, row in tqdm(df_points.iterrows(), total=df_points.shape[0], desc="Assignation des plaques aux stations"):
         plate = find_plate_for_station(row['lon(degres)'], row['lat(degres)'], df_plaques)
-        results.append(plate)
+        results.appfin(plate)
 
     return pd.Series(results, index=df_points.index)
 
@@ -121,7 +121,7 @@ def isIn_geoPandas(df_points, path):
 
     Args:
         df_points (pd.DataFrame): DataFrame contenant les points avec les colonnes 'lon(degres)' et 'lat(degres) des stations GNSS'.
-        path (string): Chemin d'accès du fichier des plaques tectoniques
+        path (stcercle): Chemin d'accès du fichier des plaques tectoniques
 
     Returns:
         geopandas.Geodataframe: Objet geodataframe jonction entre les plaques tectoniques et les stations GNSS
@@ -130,3 +130,69 @@ def isIn_geoPandas(df_points, path):
     gdf_plaques = geopandas.read_file(path)
     
     return geopandas.sjoin(gdf_points, gdf_plaques, how="left", predicate="intersects")
+
+def point_in_polygon_angle(lat, lon, polygon):
+    """
+    Détermine si un point est dans un polygone via la méthode de la somme des angles.
+    
+    Args:
+        lat (float): Latitude du point.
+        lon (float): Longitude du point.
+        polygon (np.array): Tableau numpy des sommets du polygone.
+    
+    Returns:
+        bool: True si le point est à l'intérieur.
+    """
+    P = np.array([lon, lat])
+    total_angle = 0.0
+    
+    # Gestion des MultiPolygones séparés par des NaNs dans l'ouverture du fichier précédement
+    if np.isnan(polygon).any():
+        nans = np.isnan(polygon[:, 0])
+        sep = np.where(nans)[0]
+        lim = np.concatenate(([-1], sep, [len(polygon)]))
+    else:
+        lim = np.array([-1, len(polygon)])
+        
+    for i in range(len(lim) - 1):
+        debut = lim[i] + 1
+        fin = lim[i+1]
+        
+        if fin > debut:
+            cercle = polygon[debut:fin]
+            if len(cercle) >= 3:
+                U = cercle - P
+                V = np.roll(U, -1, axis=0)
+                mult = U[:, 0] * V[:, 1] - U[:, 1] * V[:, 0]
+                scalaire = U[:, 0] * V[:, 0] + U[:, 1] * V[:, 1]
+                total_angle += np.sum(np.arctan2(mult, scalaire))
+
+    return np.isclose(np.abs(total_angle), 2 * np.pi)
+
+def isIn_angle(df_points, dico_plaques):
+    """
+    Détermine pour chaque point de df_points dans quelle plaque il se trouve en utilisant la méthode de la somme des angles.
+    
+    Args:
+        df_points (pd.DataFrame): DataFrame des points.
+        dico_plaques (dict): Dictionnaire des plaques (DataFrames).
+        
+    Returns:
+        pd.Series: Série des noms de plaques trouvées.
+    """
+    results = []
+    
+    for i, row in tqdm(df_points.iterrows(), total=len(df_points), desc="Assignation (Angle)"):
+        lat = row['lat(degres)']
+        lon = row['lon(degres)']
+        nom = 'Unknown'
+        
+        for name, df_plate in dico_plaques.items():
+            # Conversion en numpy array des sommets [Lon, Lat]
+            poly_arr = df_plate[['Lon', 'Lat']].values
+            if point_in_polygon_angle(lat, lon, poly_arr):
+                nom = name
+                break
+        results.append(nom)
+        
+    return pd.Series(results, index=df_points.index)

@@ -33,117 +33,124 @@ if __name__ == "__main__":
         GSRM = pd.read_csv("data/GSRM_strain.txt",skiprows=25,sep=r'\s+',names=["lat","long", "exx","eyy","exy","vorticity","RL-NLC","LL-NLC","e1","e2","azi_e1"],engine='c' )
         pbar.update(1)
 
-        d2 = time.time()
-        tqdm.write(f'Ouverture fichiers terminée en {d2-d1:.2f}s')
+    d2 = time.time()
+    tqdm.write(f'Ouverture fichiers terminée en {d2-d1:.2f}s')
 
-        last_version_position2 = ITRF_2020.loc[(ITRF_2020['SITE NAME'].notna())]
-        last_version_position2 = last_version_position2.drop_duplicates(subset= 'SITE NAME', keep = 'last' )
+    #dataframe des stations au propre
+    last_version_position2 = ITRF_2020.loc[(ITRF_2020['SITE NAME'].notna())]
+    last_version_position2 = last_version_position2.drop_duplicates(subset= 'SITE NAME', keep = 'last' )
 
-        tmp = ITRF_2020.copy()
-        tmp['DOMES_base'] = tmp['DOMES NB'].str[:-4]
+    tmp = ITRF_2020.copy()
+    tmp['DOMES_base'] = tmp['DOMES NB'].str[:-4]
 
-        last_version_vitesse = tmp.drop_duplicates(subset='DOMES_base',keep='last').drop(columns='DOMES_base')
+    #dataframe des deplacement des stations au propre
+    last_version_vitesse = tmp.drop_duplicates(subset='DOMES_base',keep='last').drop(columns='DOMES_base')
+    last_version_vitesse = last_version_vitesse.loc[:, ['DOMES NB', 'X/Vx', 'Y/Vy','Z/Vz','Sigma_x','Sigma_y','Sigma_z']]
+    
+    #1.1.3 : Conversion cartésien -> lat/lon
+    print("\nConversion des coordonnées")
+    last_version_position2['lon(rad)'] = last_version_position2.progress_apply(part1.radlon, axis = 1)
+    last_version_position2['lat(rad)'] = last_version_position2.progress_apply(part1.radlat, axis = 1)
+    last_version_position2['lon(degres)'] = last_version_position2.progress_apply(part1.degreslon, axis = 1 )
+    last_version_position2['lat(degres)'] = last_version_position2.progress_apply(part1.degreslat, axis = 1)
 
-        last_version_vitesse = last_version_vitesse.loc[:, ['DOMES NB', 'X/Vx', 'Y/Vy','Z/Vz','Sigma_x','Sigma_y','Sigma_z']]
-        #1.1.3 : Conversion cartésien -> lat/lon
-        print("\nConversion des coordonnées")
+    GSRM["deformation"] = np.sqrt(GSRM["exx"]**2 + GSRM["eyy"]**2 + 2 * GSRM["exy"]**2)
+    GSRM = GSRM[GSRM["deformation"] > 50]
+    GSRM = GSRM.sort_values(by=["lat", "long", "deformation"], ascending=True)
+    GSRM = GSRM.drop_duplicates(subset=["lat","long"], keep="last")
 
-        last_version_position2['lon(rad)'] = last_version_position2.progress_apply(part1.radlon, axis = 1)
-        last_version_position2['lat(rad)'] = last_version_position2.progress_apply(part1.radlat, axis = 1)
-        last_version_position2['lon(degres)'] = last_version_position2.progress_apply(part1.degreslon, axis = 1 )
-        last_version_position2['lat(degres)'] = last_version_position2.progress_apply(part1.degreslat, axis = 1)
+    # 1.3
+    dico_plaques = {}
+    features_list = Plaques_Techtoniques["features"]
 
-        GSRM["deformation"] = np.sqrt(GSRM["exx"]**2 + GSRM["eyy"]**2 + 2 * GSRM["exy"]**2)
-        GSRM = GSRM[GSRM["deformation"] > 50]
-        GSRM = GSRM.sort_values(by=["lat", "long", "deformation"], ascending=True)
-        GSRM = GSRM.drop_duplicates(subset=["lat","long"], keep="last")
-
-        # 1.3
-        dico_plaques = {}
-        features_list = Plaques_Techtoniques["features"]
-
-        for feature in tqdm(features_list, desc="Analyse géométrie plaques"):
-            nom = feature["properties"]["PlateName"]
-            coords = feature["geometry"]["coordinates"]
-            type_geom = feature["geometry"]["type"] # renommé 'type' en 'type_geom' pour éviter conflit mot-clé python
-            
-            points = []
-            if type_geom == "Polygon":
-                points = coords[0]
-            elif type_geom == "MultiPolygon":
-                for polygon in coords:
-                    points.extend(polygon[0])
-                    points.append([np.nan, np.nan])
-                    
-            if len(points) > 0:
-                nb_cols = len(points[0])
+    for feature in tqdm(features_list, desc="Analyse géométrie plaques"):
+        nom = feature["properties"]["PlateName"]
+        coords = feature["geometry"]["coordinates"]
+        type_geom = feature["geometry"]["type"] # renommé 'type' en 'type_geom' pour éviter conflit mot-clé python
+        
+        points = []
+        if type_geom == "Polygon":
+            points = coords[0]
+        elif type_geom == "MultiPolygon":
+            for polygon in coords:
+                points.extend(polygon[0])
+                points.append([np.nan, np.nan])
                 
-                if nb_cols == 2:
-                    cols = ["Lon", "Lat"]
-                else:
-                    cols = ["Lon", "Lat", "h"]
-                    
-                df = pd.DataFrame(points, columns=cols)
-                
-                if "h" in df.columns:
-                    df = df[["Lat", "Lon", "h"]]
-                else:
-                    df = df[["Lat", "Lon"]]
-                    df["h"] = 0
-
-                dico_plaques[nom] = df
+        if len(points) > 0:
+            nb_cols = len(points[0])
             
-        pmm_itrf["Name"] = pmm_itrf["Name"].str.replace("_", " ")
+            if nb_cols == 2:
+                cols = ["Lon", "Lat"]
+            else:
+                cols = ["Lon", "Lat", "h"]
                 
-        noms_itrf = set(pmm_itrf["Name"].unique())
-
-        dico_plaques_pmm_noms = {
-            nom: df 
-            for nom, df in dico_plaques.items() 
-            if nom in noms_itrf
-        }
-
-        #2
-        print("\nCalculs d'appartenance aux plaques...")
-        with tqdm(total=2, desc="Calculs spatiaux (Part 2)") as pbar:
-
-            gdf_joined = part2.isIn_geoPandas(last_version_position2, "data/Tectonic_Plates.geojson")
-            test_version = last_version_position2.copy()
-            test_version['Plate'] = gdf_joined['PlateName']
-            pbar.update(1)
+            df = pd.DataFrame(points, columns=cols)
             
-            last_version_position2['Plate'] = part2.isIn_mat(last_version_position2, dico_plaques_pmm_noms)
-            pbar.update(1)
+            if "h" in df.columns:
+                df = df[["Lat", "Lon", "h"]]
+            else:
+                df = df[["Lat", "Lon"]]
+                df["h"] = 0
 
-        print("Affichage des stations avec leur plaque tectonique associée (échantillon) :")
+            dico_plaques[nom] = df
+        
+    pmm_itrf["Name"] = pmm_itrf["Name"].str.replace("_", " ")
+            
+    noms_itrf = set(pmm_itrf["Name"].unique())
 
-        #3
-        d = time.time()
-        print("\nRecherche de déformation la plus proche...")
+    dico_plaques_pmm_noms = {
+        nom: df 
+        for nom, df in dico_plaques.items() 
+        if nom in noms_itrf
+    }
 
-        with tqdm(total=1, desc="Calcul Proximité (Part 3)") as pbar:
-            res_proxi = part3.proxi(GSRM, last_version_position2)
-            pbar.update(1)
+    #2
+    print("\nCalculs d'appartenance aux plaques...")
+    with tqdm(total=2, desc="Calculs spatiaux (Part 2)") as pbar:
+        d0_app = time.time()
+        #Test d'appartenance avec geopandas
+        gdf_joined = part2.isIn_geoPandas(last_version_position2, "data/Tectonic_Plates.geojson")
+        test_version = last_version_position2.copy()
+        test_version['Plate'] = gdf_joined['PlateName']
+        pbar.update(1)
+        d1_app = time.time()
+        print(f"temps d'appartenance avec géopandas : {d1_app-d0_app:.2f}s")
+        #Calcul d'appartenance avec la version matriciel
+        d2_app = time.time()
+        last_version_position2['Plate'] = part2.isIn_mat(last_version_position2, dico_plaques_pmm_noms)
+        pbar.update(1)
+        d3_app = time.time()
+        print(f"temps d'appartenance avec le calcul matriciel : {d3_app-d2_app:.2f}s")
 
+    # Bonus: Méthode des angles
+    print("\n--- Bonus : Méthode de la somme des angles ---")
+    d0_angle = time.time()
+    results_angle = part2.isIn_angle(last_version_position2, dico_plaques_pmm_noms)
+    d1_angle = time.time()
+    print(f"Temps d'exécution méthode angles : {d1_angle - d0_angle:.2f}s")
+    
 
-        d1 = time.time()
-        print(f'Temps calcul déformation : {d1-d:.2f}s')
+    #3
+    d = time.time()
+    print("\nRecherche de déformation la plus proche...")
+
+    with tqdm(total=1, desc="Calcul Proximité (Part 3)") as pbar:
+        res_proxi = part3.proxi(GSRM, last_version_position2)
+        pbar.update(1)
+
+    d1 = time.time()
+    print(f'Temps calcul déformation : {d1-d:.2f}s')
 
     #4
-
     incertitude_proxi = part4.incertitude_vitesse(pmm_itrf,res_proxi) # incertitude ajouter
     res_proxi = part4.v_pred(pmm_itrf,incertitude_proxi)
 
-
-    
-
-        #5
+    #5
     print("\nGénération des cartes...\n")
-
     part5.carte_monde_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
     part5.carte_eurasie_statique(dico_plaques_pmm_noms, res_proxi, GSRM)
 
-        #Comparaisons de données
+    #Comparaisons de données
     #last_version_vitesse['Norme'] = np.sqrt((last_version_vitesse['X/Vx']**2 + last_version_vitesse['Y/Vy']**2 +last_version_vitesse['Z/Vz']**2))
     res_proxi['Norme'] = part4.norme_v(res_proxi[["Vx", "Vy", "Vz"]].to_numpy() )
     last_version_vitesse['Norme'] = part4.norme_v(last_version_vitesse[["X/Vx", "Y/Vy", "Z/Vz"]].to_numpy() )
@@ -153,42 +160,48 @@ if __name__ == "__main__":
     print("\nMoyenne des normes par plaques :")
     print(df_moyenne_normes)
 
-    last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=False)
-    res_proxi = res_proxi.sort_values(by=['Norme'], ascending=False)
+    conclusion = part4.z_score(res_proxi,last_version_vitesse)
+
+    #tri dans l'ordre decroissant
+    conclusion_norme_itrf = conclusion.sort_values(by=['Norme_ITRF'], ascending=False)
+    conclusion_norme_calcul = conclusion.sort_values(by=['Norme_vitesse'], ascending=False)
 
     print("\n10 plus grands déplacement pour des stations \n")
     print("Données de base : \n")
-    print(last_version_vitesse.head(10))
+    print(conclusion_norme_itrf[['SITE NAME', 'Plate', 'Norme_ITRF', 'in_deformation']].head(10))
     print("\nCalculés : \n")
-    print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
+    print(conclusion_norme_calcul[['SITE NAME', 'Plate', 'Norme_vitesse', 'in_deformation']].head(10))
 
-    last_version_vitesse = last_version_vitesse.sort_values(by=['Norme'], ascending=True)
-    res_proxi = res_proxi.sort_values(by=['Norme'], ascending=True)
+    #tri dans l'ordre croissant
+    conclusion_norme_itrf = conclusion_norme_itrf.sort_values(by=['Norme_ITRF'], ascending=True)
+    conclusion_norme_calcul = conclusion_norme_calcul.sort_values(by=['Norme_vitesse'], ascending=True)
 
     print("\n10 plus petits déplacement pour des stations \n")
     print("Données de base : \n")
-    print(last_version_vitesse.head(10))
+    print(conclusion_norme_itrf[['SITE NAME', 'Plate', 'Norme_ITRF', 'in_deformation']].head(10))
     print("\nCalculés : \n")
-    print(res_proxi[['DOMES NB', 'Vx', 'Vy', 'Vz', 'Norme']].head(10))
+    print(conclusion_norme_calcul[['SITE NAME', 'Plate', 'Norme_vitesse', 'in_deformation']].head(10))
     
-    conclusion = part4.z_score(res_proxi,last_version_vitesse)
+    
     #suppression des stations sur plaque inconnu 
     conclusion = conclusion.loc[conclusion["z_score"].notna()]
+    #tri dans l'ordre decroissant
     conclusion_decroiss = conclusion.sort_values(by=['z_score'], ascending=False)
+    #tri dans l'ordre croissant
     conclusion_croiss =  conclusion.sort_values(by=['z_score'], ascending=True)
-    print("15 plus petit z-score  \n")
+    print("\n15 plus petit z-score  \n")
     print(conclusion_croiss.head(10))
     print("\n 15 plus grand z-score  \n")
     print(conclusion_decroiss.head(10))
     
     print("\nZ Score moyen  \n")
     print(np.mean(conclusion["z_score"]))
+    print("\nMedian des Z Score  \n")
     print(np.median(conclusion["z_score"]))
 
     print("\nZ Score moyen  hors zones de deformations\n")
     print(np.mean(conclusion["z_score" ].where(conclusion['in_deformation']==False)))
     print("z_score très légérement supérieur à 2, on peut difficlement conclure sur \n la vitesse des stations dans les zones de non déformation")
-    conclusion[["SITE NAME","z_score","in_deformation"]].to_csv("tableau_z_score.csv")
     
 
     print("\n--- Terminée ---")
