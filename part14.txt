@@ -1,0 +1,29 @@
+part1 : 
+xyz_to_pol permet premièrement de faire la projection dans le repere geographique depuis le cartésien en utilisant les parametre terrestre issus du .dat 
+et faire l'application des équations de changement de repère donné dans l'énoncé
+rad_to_deg est une fonction permettant de passer de radian à deg car le return de xyz_to_pol renvoie des coordonnée  en radian
+Creation de 4 fonction pour réaliser le pd.apply permettant de prendre des lignes une à une, récuperer les valeurs des colonnes
+x,y,z et crée une nouvelle colonne avec les coordonnée géographique (lat, long en deg et lat, long en degres )
+
+
+part 3: 
+Le but ici est de déterminer si chaque station est, oui ou non, dans une zone de déformation qu'on a choisi à 50 km
+on commence par calculer la distance haversine entre une stations et toutes les zones de déformation et ceci pour toutes 
+les stations. La distance haversine permet d'avoir la distance la plus précsise entre deux points sur une sphère
+
+
+part4: 
+On veut alors calculer les vecteurs vitesses prédites des stations en coordonnée ENU, il faut d'abord les calculer en coordonnées XYZ 
+en prenant en compte le mouvement de rotation des plaques sur la terre, des coordonnées cartésiennes des stations et du vecteur origins
+rates bias des deviations standard pour ces stations ITRF, l'équation est la suivante : vpred = w x r + T.
+On utilise les coodonnées goegraphiques pour réaliser une matrice de changement de base, de XYZ à ENU.
+Ainsi on enrichie le dataframe en entrer ITRF_2020 de ces nouvelles colonnes : 3 composantes des vitesses ENU. 
+De là on créer une fonction norme prenant en entrer un tableau numpy Nx3, renvoie un tableau Nx1 des normes.
+On utilise les colonnes des incertitudes (sigma) de toutes les données pour calculer les incertitudes des composantes des vitesses.
+On utilise une basique propagation d'incertitudes. De fait on peut calculer l'incertitudes sur la norme de toutes nos stations,
+celle calculé et celle donné dans le dataframe ITRF_2020.
+On peut combiener les deux et faire un z_score.
+Le but étant de valider nos calculs de norme en la comparant à la norme donnée dans le dataframe. Ainsi un z_score inférieur à 2
+est dit comme une bonen conclusion de notre modèle.
+
+Attention un z_score tres elever est attendu pour les stations dans les zones de déformations 

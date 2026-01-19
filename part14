@@ -1,7 +1,0 @@
-part1 : 
-projection dans le repere geographique depuis le cartésien en utilisant les parametre terrestre issus du 
-.dat 
-application des equations de changement de repère donné dans l'énoncé
-Fonction permettant de passer de radian à deg car le return de xyz_to_pol renvoie des coordonnée  en radian
-Creation de 4 fonction pour réaliser le pd.apply permettant de prendre des lignes une à une, récuperer les valeurs des colonnes
-x,y,z et crée une nouvelle colonne avec les coordonnée géographique 
